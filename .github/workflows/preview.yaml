@@ -69,8 +69,6 @@ jobs:
           service: preview-demo-pr-${{ steps.commit-sha.outputs.commit_sha }}
           region: ${{ env.GAR_LOCATION }}
           image: ${{ steps.docker-publish-path.outputs.image_path }}
-          env_vars: |-
-            PORT=80
 
       # 6. Log the Cloud Run url output
 
