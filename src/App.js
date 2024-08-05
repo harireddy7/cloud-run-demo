@@ -5,7 +5,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <p>Cloud Run Demo</p>
-        <small>preview v3</small>
+        <small>preview v4</small>
       </header>
     </div>
   );
