@@ -69,6 +69,7 @@ jobs:
           service: preview-demo-pr
           region: ${{ env.GAR_LOCATION }}
           image: ${{ steps.docker-publish-path.outputs.image_path }}
+          port: 80
 
       # 6. Log the Cloud Run url output
 
