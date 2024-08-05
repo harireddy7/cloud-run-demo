@@ -26,51 +26,59 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
       - name: Set Latest Commit Head
         id: commit-sha
-        run: echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        run: |-
+          echo "current_branch=$(git branch --show-current)"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       # 2. Authenticate to GCP
         
-      - name: Authenticate to GCP
-        id: gcp-auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ env.GAR_JSON_KEY }}
+      # - name: Authenticate to GCP
+      #   id: gcp-auth
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     credentials_json: ${{ env.GAR_JSON_KEY }}
 
-      # 3. Authenticate Docker to Google Cloud Artifact Registry (GAR)
+      # # 3. Authenticate Docker to Google Cloud Artifact Registry (GAR)
 
-      - name: Login to Google Artifact Registry (GAR)
-        id: docker-gar-auth
-        run: |
-          cat ${{ steps.gcp-auth.outputs.credentials_file_path }} | docker login -u _json_key --password-stdin ${{ env.GAR_LOCATION }}-docker.pkg.dev
+      # - name: Login to Google Artifact Registry (GAR)
+      #   id: docker-gar-auth
+      #   run: |
+      #     cat ${{ steps.gcp-auth.outputs.credentials_file_path }} | docker login -u _json_key --password-stdin ${{ env.GAR_LOCATION }}-docker.pkg.dev
 
-      # Setup new docker image preview tag with publish path
+      # # Setup new docker image preview tag with publish path
 
-      - name: Generate Docker preview image path
-        id: docker-publish-path
-        run: |
-          echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/${{ env.IMAGE }}-${{ steps.commit-sha.outputs.commit_sha }}:${{ github.run_number }}" >> $GITHUB_OUTPUT
+      # - name: Generate Docker preview image path
+      #   id: docker-publish-path
+      #   run: |
+      #     echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/${{ env.IMAGE }}-${{ steps.commit-sha.outputs.commit_sha }}:${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      # 4. Build Docker Preview Image and Publish to GAR
+      # # 4. Build Docker Preview Image and Publish to GAR
 
-      - name: Build and Push Preview Image to GAR
-        id: build-and-publish
-        run: |
-          docker build -t ${{ steps.docker-publish-path.outputs.image_path }} ./
-          docker push ${{ steps.docker-publish-path.outputs.image_path }}
+      # - name: Build and Push Preview Image to GAR
+      #   id: build-and-publish
+      #   run: |
+      #     docker build -t ${{ steps.docker-publish-path.outputs.image_path }} ./
+      #     docker push ${{ steps.docker-publish-path.outputs.image_path }}
 
-      # 5. Deploy the Image with Cloud Run
+      # # 5. Deploy the Image with Cloud Run
 
-      - name: Deploy Preview to Cloud Run
-        id: deploy
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: preview-demo-pr-${{ steps.commit-sha.outputs.commit_sha }}
-          region: ${{ env.GAR_LOCATION }}
-          image: ${{ steps.docker-publish-path.outputs.image_path }}
+      # - name: Deploy Preview to Cloud Run
+      #   id: deploy
+      #   uses: google-github-actions/deploy-cloudrun@v2
+      #   with:
+      #     service: preview-demo-pr-${{ steps.commit-sha.outputs.commit_sha }}
+      #     region: ${{ env.GAR_LOCATION }}
+      #     image: ${{ steps.docker-publish-path.outputs.image_path }}
 
-      # 6. Log the Cloud Run url output
+      # # 6. Log the Cloud Run url output
 
-      - name: Preview URL
-        run: echo ${{ steps.deploy.outputs.url }}
+      # - name: Preview URL
+      #   run: echo ${{ steps.deploy.outputs.url }}
