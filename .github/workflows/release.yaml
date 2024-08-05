@@ -113,5 +113,5 @@ jobs:
 
       # 6. Log the Cloud Run url output
 
-      - name: Show Output
+      - name: Release URL
         run: echo ${{ steps.deploy.outputs.url }}
