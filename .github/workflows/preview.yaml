@@ -31,18 +31,20 @@ jobs:
         uses: tj-actions/branch-names@v7.0.7
 
       - name: Get branch name raw
+        id: get-branch-name
         run: |-
-          echo "current_branch=${{ steps.extract-branch-name.outputs.current_branch }}"
-          echo "GITHUB_HEAD_REF is $GITHUB_HEAD_REF"
-          echo "branch_formatted=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
           echo "github.head_ref=${{ github.head_ref }}"
-          echo "${{ steps.extract-branch-name.outputs.current_branch }} | sed 's/\//-/g' | tr -d '[:space:]'"
-          echo "${{ steps.extract-branch-name.outputs.ref_branch }} | sed 's/\//-/g' | tr -d '[:space:]'"
+          echo "current_branch=${{ steps.extract-branch-name.outputs.current_branch }}"
+          echo "branch=${{ steps.extract-branch-name.outputs.current_branch }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
+          echo "ref_name=${{ steps.extract-branch-name.outputs.ref_branch }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
 
       - name: Set Latest Commit Head
         id: commit-sha
         run: |-
           echo "commit_sha=$${{ github.event.pull_request.head.sha }}"
+          echo "short_commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})"
+          echo ${{ steps.get-branch-name.outputs.branch }}
+          echo ${{ steps.get-branch-name.outputs.ref_name }}
 
       - name: Dump GitHub context
         env:
