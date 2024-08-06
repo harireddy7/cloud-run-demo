@@ -35,7 +35,7 @@ jobs:
       - name: Get docker preview image name
         id: get-docker-image-name
         run: |
-          image_name = "preview-demo-pr-${{ steps.parse-branch-commit.outputs.commit_sha }}:${{ github.run_number }}"
+          image_name="preview-demo-pr-${{ steps.parse-branch-commit.outputs.commit_sha }}:${{ github.run_number }}"
           echo "image_name=$image_name" >> $GITHUB_OUTPUT
           echo "cr_service_name=preview-demo-pr-${{ steps.parse-branch-commit.outputs.branch }}" >> $GITHUB_OUTPUT
           echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name" >> $GITHUB_OUTPUT
