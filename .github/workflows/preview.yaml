@@ -76,6 +76,7 @@ jobs:
           service: preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}
           region: ${{ env.GAR_LOCATION }}
           image: ${{ steps.get-docker-image.outputs.image_path }}
+          flags: '--allow-unauthenticated'
 
       # 6. Log the Cloud Run url output
 
