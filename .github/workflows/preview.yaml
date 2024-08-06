@@ -29,19 +29,21 @@ jobs:
       - name: Parse branch name and commit sha
         id: parse-branch-commit
         run: |-
-          echo "branch=${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
+          echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
           echo "commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
 
       - name: Get docker preview image name
         id: get-docker-image-name
         run: |
           echo "image_name=preview-demo-pr-${{ steps.parse-branch-commit.outputs.commit_sha }}:${{ github.run_number }}" >> $GITHUB_OUTPUT
+          echo "cr_service_name=preview-demo-pr-${{ steps.parse-branch-commit.outputs.branch }}" >> $GITHUB_OUTPUT
 
       - name: Log all varaiables
         run: |-
           echo "current branch is ${{ steps.parse-branch-commit.outputs.branch }}"
           echo "current commit sha is ${{ steps.parse-branch-commit.outputs.commit_sha }}"
           echo "docker image name is ${{ steps.get-docker-image-name.outputs.image_name }}"
+          echo "cloud run service name is ${{ steps.get-docker-image-name.outputs.cr_service_name }}"
       
       # 2. Authenticate to GCP
         
