@@ -26,31 +26,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get branch name with action
-        id: extract-branch-name
-        uses: tj-actions/branch-names@v7.0.7
-
-      - name: Get branch name raw
-        id: get-branch-name
+      - name: Parse branch name and commit sha
+        id: parse-branch-commit
         run: |-
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "current_branch=${{ steps.extract-branch-name.outputs.current_branch }}"
-          echo "branch=${{ steps.extract-branch-name.outputs.current_branch }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
-          echo "ref_name=${{ steps.extract-branch-name.outputs.ref_branch }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
+          echo "branch=${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]'" >> $GITHUB_OUTPUT
+          echo "commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
 
-      - name: Set Latest Commit Head
-        id: commit-sha
+      - name: Get docker preview image name
+        id: get-docker-image-name
+        run: |
+          echo "image_name=preview-demo-pr-${{ steps.parse-branch-commit.outputs.commit_sha }}:${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      - name: Log all varaiables
         run: |-
-          echo "commit_sha=$${{ github.event.pull_request.head.sha }}"
-          echo "short_commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})"
-          echo ${{ steps.get-branch-name.outputs.branch }}
-          echo ${{ steps.get-branch-name.outputs.ref_name }}
-
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
+          echo "current branch is ${{ steps.parse-branch-commit.outputs.branch }}"
+          echo "current commit sha is ${{ steps.parse-branch-commit.outputs.commit_sha }}"
+          echo "docker image name is ${{ steps.get-docker-image-name.outputs.image_name }}"
+      
       # 2. Authenticate to GCP
         
       # - name: Authenticate to GCP
