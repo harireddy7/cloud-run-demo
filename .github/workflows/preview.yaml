@@ -26,17 +26,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      - name: Get branch name with action
+        id: extract-branch-name
+        uses: tj-actions/branch-names@v7.0.7
+
+      - name: Get branch name raw
+        run: |-
+          echo "current_branch=${{ steps.extract-branch-name.outputs.current_branch }}"
+          echo "GITHUB_HEAD_REF is $GITHUB_HEAD_REF"
+          echo "branch_formatted=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "${{ steps.extract-branch-name.outputs.current_branch }} | sed 's/\//-/g' | tr -d '[:space:]'"
+          echo "${{ steps.extract-branch-name.outputs.ref_branch }} | sed 's/\//-/g' | tr -d '[:space:]'"
 
       - name: Set Latest Commit Head
         id: commit-sha
         run: |-
-          echo "current_branch=$(git branch --show-current)"
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "commit_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_sha=$${{ github.event.pull_request.head.sha }}"
+
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
       # 2. Authenticate to GCP
         
