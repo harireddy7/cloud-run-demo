@@ -21,12 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # 1. Checkout
+      # Checkout
 
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2 Get PR branch name and latest short commit hash
+      # Install yq
+
+      - name: Install YQ/JQ
+        run: |
+          YQ=4.16.1
+          curl -sL https://github.com/mikefarah/yq/releases/download/v${YQ}/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sL https://stedolan.github.io/jq/download/linux64/jq -o /usr/local/bin/jq && chmod +x /usr/local/bin/jq
+
+      # Get PR branch name and latest short commit hash
 
       - name: Parse current branch name
         id: parse-branch-name
@@ -36,7 +44,7 @@ jobs:
         id: parse-commit-hash
         run: echo "commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
       
-      # 3. Authenticate to GCP
+      # Authenticate to GCP
         
       - name: Authenticate to GCP
         id: gcp-auth
@@ -44,13 +52,14 @@ jobs:
         with:
           credentials_json: ${{ env.GAR_JSON_KEY }}
 
-      # 4. Authenticate Docker to Google Cloud Artifact Registry (GAR)
+      # Configure Docker to authenticate to Artifact Registry hosts
 
-      - name: Login to Google Artifact Registry (GAR)
-        id: docker-gar-auth
-        run: |
-          cat ${{ steps.gcp-auth.outputs.credentials_file_path }} | docker login -u _json_key --password-stdin ${{ env.GAR_LOCATION }}-docker.pkg.dev
+      - name: Configure Docker to GAR
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '456.0.0'
 
+      # Get docker image name and image path
 
       - name: Get docker preview image name
         id: get-docker-image
@@ -59,26 +68,38 @@ jobs:
           echo "image_name=$image_name" >> $GITHUB_OUTPUT
           echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name" >> $GITHUB_OUTPUT
           
-      # 6. Build Docker Preview Image and Publish to GAR
+      # Build Docker Preview Image and Publish to GAR
 
       - name: Build and Push Preview Image to GAR
         id: build-and-publish
         run: |
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
           docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
           docker push ${{ steps.get-docker-image.outputs.image_path }}
 
-      # 7. Deploy the Image with Cloud Run
+      # Deploy the Image with Cloud Run
 
-      - name: Deploy Preview to Cloud Run
+      # - name: Deploy Preview to Cloud Run
+      #   id: deploy
+      #   uses: google-github-actions/deploy-cloudrun@v2
+      #   with:
+      #     service: preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}
+      #     image: ${{ steps.get-docker-image.outputs.image_path }}
+      #     region: ${{ env.GAR_LOCATION }}
+      #     flags: '--allow-unauthenticated'
+
+      - name: Deploy the Preview to Cloud Run
         id: deploy
-        uses: google-github-actions/deploy-cloudrun@v2
-        with:
-          service: preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}
-          region: ${{ env.GAR_LOCATION }}
-          image: ${{ steps.get-docker-image.outputs.image_path }}
-          flags: '--allow-unauthenticated'
+        run: |-
+          OUTPUT=gcloud-deploy-output.log
+          gcloud run deploy preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }} --image ${{ steps.get-docker-image.outputs.image_path }} --region ${{ env.GAR_LOCATION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          cat $OUTPUT
+          echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_OUTPUT
+          echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_ENV
 
-      # 6. Log the Cloud Run url output
+      # Log the Cloud Run url output
 
       - name: Preview URL
-        run: echo ${{ steps.deploy.outputs.url }}
+        run: |-
+          echo ${{ env.DEPLOYMENT_URL }}
+          echo ${{ steps.deploy.outputs.url }}

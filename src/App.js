@@ -5,7 +5,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <p>Cloud Run Demo</p>
-        <small>preview v6</small>
+        <small>Using gcloud commands to build and deploy</small>
       </header>
     </div>
   );
