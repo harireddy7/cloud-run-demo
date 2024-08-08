@@ -14,8 +14,7 @@ serviceTemplateAnnotations:
   autoscaling.knative.dev/maxScale: 2
 
 # Image Settings
-image: location-docker.pkg.dev/project-id/repo-id
-image_tag: latest
+image_path: location-docker.pkg.dev/project-id/repo-id:latest
 
 port: 8080
 
