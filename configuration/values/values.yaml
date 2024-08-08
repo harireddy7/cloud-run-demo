@@ -1,0 +1,35 @@
+# Service Settings
+service:
+  name: preview-demo
+  accountName: 1062448356199-compute@developer.gserviceaccount.com
+  environment: preview
+  isPreview: true
+  ingressType: all
+labels: {}
+
+# Revision Management
+liveRevision: preview-demo
+serviceTemplateAnnotations:
+  autoscaling.knative.dev/minScale: 0
+  autoscaling.knative.dev/maxScale: 2
+
+# Image Settings
+image: location-docker.pkg.dev/project-id/repo-id
+image_tag: latest
+
+port: 8080
+
+env:
+  # Pass int vars as string or rendering process can be disrupted
+  - name: REACT_APP_BE_API_URL
+    value: https://jsonplaceholder.typicode.com/todos/1
+  - name: REACT_APP_ENV
+    value: 'preview'
+
+secrets:
+  - envName: API_KEY
+    gsmVersion: 1
+    gsmName: api-key
+
+resources: {}
+# traffic:

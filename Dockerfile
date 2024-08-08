@@ -8,6 +8,11 @@ COPY yarn.lock ./yarn.lock
 
 RUN yarn install --frozen-lockfile
 
+ARG REACT_APP_BE_API_URL
+ARG REACT_APP_ENV
+
+RUN echo REACT_APP_BE_API_URL=$REACT_APP_BE_API_URL >> .env && REACT_APP_ENV=$REACT_APP_BE_API_URL >> .env
+
 COPY . ./
 
 RUN yarn build

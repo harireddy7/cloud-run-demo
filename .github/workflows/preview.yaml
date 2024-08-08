@@ -64,10 +64,10 @@ jobs:
       - name: Get docker preview image name
         id: get-docker-image
         run: |
-          image_name="preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}:${{ github.run_number }}"
+          image_name="preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}"
           echo "image_name=$image_name" >> $GITHUB_OUTPUT
-          echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name" >> $GITHUB_OUTPUT
-          
+          echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name:${{ github.run_number }}" >> $GITHUB_OUTPUT
+
       # Build Docker Preview Image and Publish to GAR
 
       - name: Build and Push Preview Image to GAR
@@ -77,29 +77,47 @@ jobs:
           docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
           docker push ${{ steps.get-docker-image.outputs.image_path }}
 
-      # Deploy the Image with Cloud Run
+      # Render Helm Template
 
-      # - name: Deploy Preview to Cloud Run
-      #   id: deploy
-      #   uses: google-github-actions/deploy-cloudrun@v2
-      #   with:
-      #     service: preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}
-      #     image: ${{ steps.get-docker-image.outputs.image_path }}
-      #     region: ${{ env.GAR_LOCATION }}
-      #     flags: '--allow-unauthenticated'
+      - name: Render Helm Template
+        id: render-helm
+        uses: stefanprodan/kube-tools@v1
+        with:
+          helm: 3.9.0
+          command: |
+            echo "Rendering Helm template for ${{ steps.get-docker-image.outputs.image_name }}"
+            helm template ./configuration/ \
+              -f ./configuration/values/values.yaml \
+              --set image=${{ steps.get-docker-image.outputs.image_name }} \
+              --set image_tag=${{ github.run_number }} \
+              --set service.isPreview=true \
+              --set servie.name=${{ steps.get-docker-image.outputs.image_name }} \
+              --output-dir ./rendered
 
-      - name: Deploy the Preview to Cloud Run
+            echo "########## Rendered Template ##########"
+            cat ./rendered/preview-demo/templates/service.yaml
+
+      # Deploy the service to Cloud Run
+
+      - name: Deploy to Cloud Run
         id: deploy
-        run: |-
+        run: |
           OUTPUT=gcloud-deploy-output.log
-          gcloud run deploy preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }} --image ${{ steps.get-docker-image.outputs.image_path }} --region ${{ env.GAR_LOCATION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          SERVICE=${{steps.get-docker-image.outputs.image_name }}
+          gcloud run services replace ./rendered/preview-demo/templates/service.yaml --region ${{ env.GAR_LOCATION }} --project ${{ env.GCP_PROJECT_ID }} --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          gcloud run services get-iam-policy $SERVICE --region ${{ env.GAR_LOCATION }} --project ${{ env.GCP_PROJECT_ID }} --format yaml > iam-policy-status.yaml
+          cat iam-policy-status.yaml
+          IAM_POLICY_STATUS=$(yq eval '.bindings[] | .members[]' iam-policy-status.yaml)
+          if [[ "$IAM_POLICY_STATUS" != "allUsers" ]]; then
+            gcloud run services add-iam-policy-binding $SERVICE --member="allUsers" --platform managed --region ${{ env.GAR_LOCATION }} --role="roles/run.invoker" --project ${{ env.GCP_PROJECT_ID }}
+          fi
           cat $OUTPUT
           echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_OUTPUT
-          echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_ENV
 
-      # Log the Cloud Run url output
+      # Add the deployment URL to the PR comment
 
-      - name: Preview URL
-        run: |-
-          echo ${{ env.DEPLOYMENT_URL }}
-          echo ${{ steps.deploy.outputs.url }}
+      - name: Add Comment to PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            Deployed to: ${{ steps.deploy.outputs.url }}

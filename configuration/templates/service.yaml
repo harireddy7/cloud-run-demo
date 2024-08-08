@@ -1,0 +1,63 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  annotations:
+  {{- if .Values.annotations }}
+    {{- toYaml .Values.annotations | nindent 4}}
+  {{- end }}
+  {{- if eq .Values.service.isPreview false }}
+    run.googleapis.com/ingress: {{ .Values.service.ingressType }}
+  {{- else }}
+    run.googleapis.com/ingress: all
+  {{- end }}
+  labels:
+    name: {{ .Values.service.name }}
+    environment: {{ .Values.service.environment }}
+    {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+    {{- end }}
+spec:
+  traffic:
+  - percent: 100
+    latestRevision: true
+  template:
+    metadata:
+      annotations:
+        {{- range $key, $val := .Values.serviceTemplateAnnotations }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end }}
+      labels:
+        {{- if eq .Values.service.isPreview false }}
+        live: "true"
+        {{- else }}
+        live: "false"
+        {{- end }}
+    spec:
+      {{- if .Values.service.accountName }}
+      serviceAccountName: {{ .Values.service.accountName }}
+      {{- end }}
+      containers:
+      - image: {{ .Values.image }}:{{ .Values.image_tag }}
+        ports:
+        - containerPort: {{ .Values.port }}
+        {{- if .Values.concurrency }}
+        containerConcurrency: {{ .Values.concurrency }}
+        {{- end }}
+        {{- if .Values.resources }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+        {{- if .Values.env }}
+        env:
+          {{- toYaml .Values.env | nindent 10}}
+          {{- if .Values.secrets }}
+          {{- range .Values.secrets }}
+          - name: {{ .envName }}
+            valueFrom:
+              secretKeyRef:
+                key: "{{ .gsmVersion }}"
+                name: {{ .gsmName }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
