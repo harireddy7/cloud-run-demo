@@ -17,6 +17,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      pull-requests: 'write'
 
     runs-on: ubuntu-latest
     steps:
@@ -119,4 +120,4 @@ jobs:
         uses: mshick/add-pr-comment@v2
         with:
           message: |
-            Deployed to: ${{ steps.deploy.outputs.url }}
+            These changes are deployed, you can preview it on ${{ steps.deploy.outputs.DEPLOYMENT_URL }}
