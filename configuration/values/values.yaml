@@ -25,10 +25,5 @@ env:
   - name: REACT_APP_ENV
     value: 'preview'
 
-secrets:
-  - envName: API_KEY
-    gsmVersion: 1
-    gsmName: api-key
-
 resources: {}
 # traffic:
