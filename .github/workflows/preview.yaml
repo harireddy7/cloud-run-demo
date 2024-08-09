@@ -53,9 +53,7 @@ jobs:
         with:
           credentials_json: ${{ env.GAR_JSON_KEY }}
 
-      # Configure Docker to authenticate to Artifact Registry hosts
-
-      - name: Configure Docker to GAR
+      - name: Install google cloud sdk
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
           version: '456.0.0'
@@ -69,7 +67,7 @@ jobs:
           echo "image_name=$image_name" >> $GITHUB_OUTPUT
           echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name:${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      # Build Docker Preview Image and Publish to GAR
+      # Configure, Build Docker Preview Image and Publish to GAR
 
       - name: Build and Push Preview Image to GAR
         id: build-and-publish
