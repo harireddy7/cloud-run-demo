@@ -11,6 +11,7 @@ env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
   GAR_JSON_KEY: ${{ secrets.GAR_JSON_KEY }}
+  SERVICE: preview-demo
   IMAGE: preview-demo-pr
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
       - name: Get cloud run service and docker image names
         id: get-service-image
         run: |
-          echo "image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
+          echo "image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
           echo "service=${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
 
       - name: Authenticate to GCP
