@@ -86,9 +86,8 @@ jobs:
           command: |
             echo "Rendering Helm template for ${{ steps.get-docker-image.outputs.image_name }}"
             helm template ./configuration/ \
-              -f ./configuration/values/values.yaml \
+              -f ./configuration/values/values-preview.yaml \
               --set image_path=${{ steps.get-docker-image.outputs.image_path }} \
-              --set service.isPreview=true \
               --set servie.name=${{ steps.get-docker-image.outputs.image_name }} \
               --output-dir ./rendered
 
