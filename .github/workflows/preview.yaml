@@ -1,0 +1,121 @@
+name: Build and Deploy PR Preview to Cloud Run
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+  GAR_JSON_KEY: ${{ secrets.GAR_JSON_KEY }}
+  SERVICE: preview-demo
+  IMAGE: preview-demo-pr
+
+jobs:
+  build-publish-deploy-preview:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      pull-requests: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Install yq
+
+      - name: Install YQ/JQ
+        run: |
+          YQ=4.16.1
+          curl -sL https://github.com/mikefarah/yq/releases/download/v${YQ}/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sL https://stedolan.github.io/jq/download/linux64/jq -o /usr/local/bin/jq && chmod +x /usr/local/bin/jq
+
+      # Get PR branch name and latest short commit hash
+
+      - name: Parse current branch name
+        id: parse-branch-name
+        run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+
+      - name: Parse commit hash
+        id: parse-commit-hash
+        run: echo "commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
+      
+      # Authenticate to GCP
+        
+      - name: Authenticate to GCP
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.GAR_JSON_KEY }}
+
+      - name: Install google cloud sdk
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '456.0.0'
+
+      # Get docker image name and image path
+
+      - name: Get docker preview image name
+        id: get-docker-image
+        run: |
+          image_name="preview-demo-pr-${{ steps.parse-branch-name.outputs.branch }}"
+          echo "image_name=$image_name" >> $GITHUB_OUTPUT
+          echo "image_path=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE }}/$image_name:${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      # Configure, Build Docker Preview Image and Publish to GAR
+
+      - name: Build and Push Preview Image to GAR
+        id: build-and-publish
+        run: |
+          gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
+          docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
+          docker push ${{ steps.get-docker-image.outputs.image_path }}
+
+      # Render Helm Template
+
+      - name: Render Helm Template
+        id: render-helm
+        uses: stefanprodan/kube-tools@v1
+        with:
+          helm: 3.9.0
+          command: |
+            echo "Rendering Helm template for ${{ steps.get-docker-image.outputs.image_name }}"
+            helm template ./configuration/ \
+              -f ./configuration/values/values.yaml \
+              --set image_path=${{ steps.get-docker-image.outputs.image_path }} \
+              --set service.isPreview=true \
+              --set servie.name=${{ steps.get-docker-image.outputs.image_name }} \
+              --output-dir ./rendered
+
+            echo "########## Rendered Template ##########"
+            cat ./rendered/preview-demo/templates/service.yaml
+
+      # Deploy the service to Cloud Run
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          OUTPUT=gcloud-deploy-output.log
+          SERVICE=${{steps.get-docker-image.outputs.image_name }}
+          gcloud run services replace ./rendered/preview-demo/templates/service.yaml --region ${{ env.GAR_LOCATION }} --project ${{ env.GCP_PROJECT_ID }} --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          gcloud run services get-iam-policy $SERVICE --region ${{ env.GAR_LOCATION }} --project ${{ env.GCP_PROJECT_ID }} --format yaml > iam-policy-status.yaml
+          cat iam-policy-status.yaml
+          IAM_POLICY_STATUS=$(yq eval '.bindings[] | .members[]' iam-policy-status.yaml)
+          if [[ "$IAM_POLICY_STATUS" != "allUsers" ]]; then
+            gcloud run services add-iam-policy-binding $SERVICE --member="allUsers" --platform managed --region ${{ env.GAR_LOCATION }} --role="roles/run.invoker" --project ${{ env.GCP_PROJECT_ID }}
+          fi
+          cat $OUTPUT
+          echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_OUTPUT
+
+      # Add the deployment URL to the PR comment
+
+      - name: Add Comment to PR
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            These changes are deployed, you can preview it on ${{ steps.deploy.outputs.DEPLOYMENT_URL }}
