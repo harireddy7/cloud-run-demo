@@ -26,13 +26,13 @@ jobs:
 
       - name: Parse current branch name
         id: parse-branch-name
-        run: |-
-          echo "${{ github.head_ref }}"
-          echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+        run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
 
-      - name: Parse cloud run service name
-        id: get-cloudrun-service
-        run: echo "service=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
+      - name: Get cloud run service and docker image names
+        id: get-service-image
+        run: |
+          echo "image=${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
+          echo "service=${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}" >> $GITHUB_OUTPUT
 
       - name: Authenticate to GCP
         id: gcp-auth
@@ -45,14 +45,14 @@ jobs:
         with:
           version: '456.0.0'
 
-      - name: Delete cloud run service
+      - name: Delete Cloud Run preview service
         run: |
-          echo "Delete cloud run service"
-          gcloud run services delete ${{ steps.get-cloudrun-service.outputs.service }} --region ${{ env.GAR_LOCATION }}
+          echo "Deleting cloud run service for preview branch"
+          gcloud run services delete ${{ steps.get-service-image.outputs.service }} --region ${{ env.GAR_LOCATION }}
           
-      - name: Delete PR preview tags
+      - name: Delete docker preview image
         run: |
           gcloud auth configure-docker ${{ env.GAR_LOCATION }}-docker.pkg.dev
-          gcloud  artifacts docker images list ${{ steps.get-cloudrun-service.outputs.service }} --include-tags --format="flattened(package, tags[0])
+          gcloud artifacts docker images list ${{ steps.get-service-image.outputs.image }} --include-tags --format="flattened(package, tags[0])
           echo "Deleting preview image from GAR"
-          gcloud artifacts docker images delete ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE }}/${{ env.IMAGE }}-${{ steps.parse-branch-name.outputs.branch }}
+          gcloud artifacts docker images delete ${{ steps.get-service-image.outputs.image }}
