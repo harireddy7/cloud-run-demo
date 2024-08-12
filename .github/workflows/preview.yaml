@@ -6,7 +6,7 @@ on:
 permissions: write-all
 
 jobs:
-  test-and-build:
+  build-preview-deploy:
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -24,8 +24,9 @@ jobs:
 
       - name: Parse current branch name
         id: parse-branch-name
-        run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+        # run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+        run: echo ${{ toJson(github) }}
 
-      - name: Log branch name
-        run: |
-          echo ${{ steps.parse-branch-name.outputs.branch }}
+      # - name: Log branch name
+      #   run: |
+      #     echo ${{ steps.parse-branch-name.outputs.branch }}
