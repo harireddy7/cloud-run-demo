@@ -11,7 +11,6 @@ env:
   GAR_CREDENTIALS_JSON: ${{ secrets.GAR_JSON_KEY }}
   IMAGE: ${{ secrets.GAR_IMAGE }}
   SERVICE: ${{ secrets.CLOUDRUN_SERVICE }}
-  IMAGE_PATH: ${{ secrets.GAR_LOCATION }}/${{ secrets.GAR_PROJECT_ID }}/${{ secrets.REPO }}/${{ secrets.IMAGE }}
 
 jobs:
   build-preview-deploy:
@@ -27,6 +26,12 @@ jobs:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Install YQ/JQ
+        run: |
+          YQ=4.16.1
+          curl -sL https://github.com/mikefarah/yq/releases/download/v${YQ}/yq_linux_amd64 -o /usr/local/bin/yq && chmod +x /usr/local/bin/yq
+          curl -sL https://stedolan.github.io/jq/download/linux64/jq -o /usr/local/bin/jq && chmod +x /usr/local/bin/jq
 
       # Get PR branch name
 
@@ -53,10 +58,27 @@ jobs:
 
       - name: Get docker preview image name
         id: get-docker-image
-        run: echo "image_tag=${{ env.IMAGE_PATH }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ steps.parse-branch-name.outputs.commit_sha }}" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ steps.parse-branch-name.outputs.commit_sha }}" >> $GITHUB_OUTPUT
 
-      - name: Log Preview Docker image path
+      # Configure, Build Docker Preview Image and Publish to GAR
+
+      - name: Build and Push Preview Image to GAR
+        id: build-and-publish
         run: |
-          echo ${{ steps.parse-branch-name.outputs.branch_name }}
-          echo ${{ steps.parse-branch-name.outputs.commit_sha }}
-          echo ${{ steps.get-docker-image.outputs.image_tag }}
+          gcloud auth configure-docker ${{ env.LOCATION }}
+          docker build -t ${{ steps.get-docker-image.outputs.image_tag }} ./
+          docker push ${{ steps.get-docker-image.outputs.image_tag }}
+
+      # Deploy the Image with Cloud Run
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          OUTPUT=gcloud-deploy-output.log
+          gcloud run deploy ${{ env.SERVICE }}-${{ steps.parse-branch-name.outputs.branch_name }} --image ${{ steps.get-docker-image.outputs.image_tag }} --region ${{ env.REGION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          cat $OUTPUT
+          echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_OUTPUT
+
+      - name: Log Preview URL
+        run: |
+          Changes are deployed, you can preview it on ${{ steps.deploy.outputs.DEPLOYMENT_URL }}
