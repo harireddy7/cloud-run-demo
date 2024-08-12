@@ -1,4 +1,4 @@
-name: Build when a pull request is raised against dev branch
+name: Build when a pull request is raised against main branch
 
 on:
   pull_request:

@@ -1,12 +1,17 @@
 name: Build and Deploy PR Preview to Cloud Run
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+
+permissions: write-all
 
 jobs:
   test-and-build:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      pull-requests: 'write'
+
     runs-on: ubuntu-latest
     steps:
 
@@ -15,17 +20,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Get PR branch name and latest short commit hash
+      # Get PR branch name
 
       - name: Parse current branch name
         id: parse-branch-name
         run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
 
-      - name: Parse commit hash
-        id: parse-commit-hash
-        run: echo "commit_sha=$(git rev-parse --short ${{ github.event.pull_request.head.sha }})" >> $GITHUB_OUTPUT
-
-      - name: Log branch name and commit sha
+      - name: Log branch name
         run: |
           echo ${{ steps.parse-branch-name.outputs.branch }}
-          echo ${{ steps.parse-commit-hash.outputs.commit_sha }}
