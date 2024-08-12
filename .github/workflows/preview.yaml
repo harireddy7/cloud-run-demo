@@ -11,6 +11,7 @@ env:
   GAR_CREDENTIALS_JSON: ${{ secrets.GAR_JSON_KEY }}
   IMAGE: ${{ secrets.GAR_IMAGE }}
   SERVICE: ${{ secrets.CLOUDRUN_SERVICE }}
+  IMAGE_PATH: ${{ secrets.GAR_LOCATION }}/${{ secrets.GAR_PROJECT_ID }}/${{ secrets.REPO }}/${{ secrets.IMAGE }}
 
 jobs:
   build-preview-deploy:
@@ -52,10 +53,10 @@ jobs:
 
       - name: Get docker preview image name
         id: get-docker-image
-        run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT
+        run: echo "image_tag=${{ env.IMAGE_PATH }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ steps.parse-branch-name.outputs.commit_sha }}" >> $GITHUB_OUTPUT
 
       - name: Log Preview Docker image path
         run: |
           echo ${{ steps.parse-branch-name.outputs.branch_name }}
           echo ${{ steps.parse-branch-name.outputs.commit_sha }}
-          echo ${{ steps.get-docker-image.outputs.image_path }}
+          echo ${{ steps.get-docker-image.outputs.image_tag }}
