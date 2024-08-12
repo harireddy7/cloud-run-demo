@@ -31,12 +31,9 @@ jobs:
 
       - name: Parse current branch name
         id: parse-branch-name
-        # run: echo "branch=$(echo ${{ github.head_ref }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
         run: |
-          echo ${{ github.ref_name }}
-          echo "------------------------------------------------------------------------"
-          echo ${{ toJson(github) }}
           echo "branch_name=$(echo ${{ github.ref_name }} | sed 's/\//-/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+          echo "commit_sha=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
 
       # GCP setup
         
@@ -58,4 +55,7 @@ jobs:
         run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ github.run_attempt }}" >> $GITHUB_OUTPUT
 
       - name: Log Preview Docker image path
-        run: echo ${{ steps.get-docker-image.outputs.image_path }}
+        run: |
+          echo ${{ steps.parse-branch-name.outputs.branch_name }}
+          echo ${{ steps.parse-branch-name.outputs.commit_sha }}
+          echo ${{ steps.get-docker-image.outputs.image_path }}
