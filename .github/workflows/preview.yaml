@@ -1,4 +1,4 @@
-name: Build and Deploy PR Preview to Cloud Run
+name: Preview - Build and Deploy PR Preview to Cloud Run
 
 on:
   workflow_dispatch:
