@@ -81,4 +81,4 @@ jobs:
 
       - name: Log Preview URL
         run: |
-          Changes are deployed, you can preview it on ${{ steps.deploy.outputs.DEPLOYMENT_URL }}
+          echo "Changes are deployed, you can preview it on ${{ steps.deploy.outputs.DEPLOYMENT_URL }}"
