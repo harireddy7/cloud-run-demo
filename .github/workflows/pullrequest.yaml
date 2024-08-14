@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install, test, build, upload
-        run: echo "Install, test, build and upload artifacts"
+        run: echo "${{ toJson(github) }}"
 
   deploy-preview:
     needs: test-and-build
