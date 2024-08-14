@@ -6,7 +6,7 @@ function App() {
       <header className="App-header">
         <p>Cloud Run Demo</p>
         <small>Add and update pullrequest, release, cleanup and preview workflows</small>
-        <small>Test pullrequest and label event workflow</small>
+        <small>Test pullrequest and label event workflow 2</small>
       </header>
     </div>
   );
