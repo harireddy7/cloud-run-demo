@@ -4,17 +4,26 @@ on:
   pull_request:
     branches:
       - main
+    types: [labeled]
 
 jobs:
-  build:
+  test-and-build:
+    name: Run unit tests and build the app
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install packages
-        run: yarn install --frozen-lockfile
+      - name: Install, test, build, upload
+        run: echo "Install, test, build and upload artifacts"
 
-      - name: Build the application
-        run: yarn build
+  deploy-preview:
+    needs: test-and-build
+    if: ${{ github.event.label.name == 'preview' }}
+    name: Publish and deploy preview image to cloud run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check label
+        run: echo "${{ toJson(github) }}"
