@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [assigned, opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
   test-and-build:
