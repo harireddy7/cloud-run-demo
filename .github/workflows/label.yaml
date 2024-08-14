@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    if: ${{ github.event.label.name == 'preview' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -18,13 +19,12 @@ jobs:
         run: echo ${{ toJson(github) }}
 
       - name: Run only on preview label
-        if: ${{ github.event.label.name == 'preview' }}
         run: |
           echo "Running preview label step"
           echo ${{ toJson(github.event) }}
 
-      - name: Install packages
-        run: yarn install --frozen-lockfile
+      # - name: Install packages
+      #   run: yarn install --frozen-lockfile
 
-      - name: Build the application
-        run: yarn build
+      # - name: Build the application
+      #   run: yarn build
