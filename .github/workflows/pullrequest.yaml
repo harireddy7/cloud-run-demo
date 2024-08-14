@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - main
-    types: [labeled]
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
   test-and-build:
@@ -15,8 +15,8 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install, test, build, upload
-        run: echo "Install, test, build and upload artifacts"
+      - name: Log github context
+        run: echo "${{ toJson(github) }}"
 
   deploy-preview:
     needs: test-and-build
