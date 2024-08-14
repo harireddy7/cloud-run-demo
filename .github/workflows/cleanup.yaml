@@ -1,18 +1,18 @@
-name: Clean up - Stop Cloud Run service and remove respective docker images post PR closure
+# name: Clean up - Stop Cloud Run service and remove respective docker images post PR closure
 
-on:
-  pull_request:
-    branches:
-      - main
-    types:
-      - closed
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#     types:
+#       - closed
 
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+# jobs:
+#   cleanup:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v4
 
-      - name: debug clean up
-        run: echo "Check for open PR and clean up cloud run service and docker preview image"
+#       - name: debug clean up
+#         run: echo "Check for open PR and clean up cloud run service and docker preview image"
