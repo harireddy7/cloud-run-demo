@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install, test, build, upload
+      - name: Log github context
         run: echo "${{ toJson(github) }}"
 
   deploy-preview:
