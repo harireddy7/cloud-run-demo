@@ -1,0 +1,67 @@
+# This workflow build and push a Docker image to Google Artifact Registry and deploy it on Cloud Run when a commit is pushed to the "main" branch
+
+name: Release - Build release image and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGION: ${{ secrets.GAR_REGION }}
+  LOCATION: ${{ secrets.GAR_LOCATION }}
+  PROJECT_ID: ${{ secrets.GAR_PROJECT_ID }}
+  REPO: ${{ secrets.GAR_REPO }}
+  GAR_CREDENTIALS_JSON: ${{ secrets.GAR_JSON_KEY }}
+  IMAGE: ${{ secrets.GAR_IMAGE }}
+  SERVICE: ${{ secrets.CLOUDRUN_SERVICE }}
+  BASE_VERSION: 1.0.0
+
+jobs:
+  build-publish-release:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      # GCP setup
+        
+      - name: Authenticate to GCP
+        id: gcp-auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ env.GAR_CREDENTIALS_JSON }}
+
+      - name: Install google cloud sdk
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '456.0.0'
+
+      # Get docker image name and image path
+
+      - name: Get docker preview image name
+        id: get-docker-image
+        run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ env.BASE_VERSION }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      # Configure, Build Docker Preview Image and Publish to GAR
+
+      - name: Build and Push Preview Image to GAR
+        id: build-and-publish
+        run: |
+          gcloud auth configure-docker ${{ env.LOCATION }}
+          docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
+          docker push ${{ steps.get-docker-image.outputs.image_path }}
+
+      # Deploy the Image with Cloud Run
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          OUTPUT=gcloud-deploy-output.log
+          gcloud run deploy ${{ env.SERVICE }} --image ${{ steps.get-docker-image.outputs.image_path }} --region ${{ env.REGION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          cat $OUTPUT
