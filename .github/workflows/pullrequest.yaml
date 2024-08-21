@@ -29,5 +29,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check label
+      - name: Logs label
         run: echo "${{ toJson(github) }}"
