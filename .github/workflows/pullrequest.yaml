@@ -1,5 +1,9 @@
 name: Pull Request - Build when a pull request is raised against main branch
 
+# 1 - PR open without label => test, build, upload
+# 2 - PR open with preview label => test, build, upload, preview deploy
+# 3 - PR open with any other label => skip??
+
 on:
   pull_request:
     branches:
