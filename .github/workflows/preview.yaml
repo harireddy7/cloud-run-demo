@@ -1,0 +1,17 @@
+name: Label - Deploy preview image when PR has preview label
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [labeled]
+
+jobs:
+  deploy-preview:
+    if: ${{ github.event.label.name == 'preview' }}
+    name: Publish and deploy preview image to cloud run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: log github context
+        run: echo "${{ toJson(github) }}"
