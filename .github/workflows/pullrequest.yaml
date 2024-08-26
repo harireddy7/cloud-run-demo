@@ -19,5 +19,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: log github refs
+        run: |
+          echo "${{ github.head_ref }}"
+          echo "${{ github.ref_name }}"
+
       - name: Log github context
         run: echo "${{ toJson(github) }}"
