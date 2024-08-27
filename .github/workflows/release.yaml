@@ -63,5 +63,6 @@ jobs:
         id: deploy
         run: |
           OUTPUT=gcloud-deploy-output.log
-          gcloud run deploy ${{ env.SERVICE }} --image ${{ steps.get-docker-image.outputs.image_path }} --region ${{ env.REGION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+          gcloud config list --format='text(core.project)'
+          gcloud run deploy ${{ env.SERVICE }} --image ${{ steps.get-docker-image.outputs.image_path }} --project cloud-run-deploy --region ${{ env.REGION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
           cat $OUTPUT
