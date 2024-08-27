@@ -5,7 +5,7 @@ name: Release - Build release image and Deploy to Cloud Run
 on:
   push:
     branches:
-      - main
+    - main
 
 # env:
 #   REGION: ${{ secrets.GAR_REGION }}
@@ -16,6 +16,7 @@ on:
 #   IMAGE: ${{ secrets.GAR_IMAGE }}
 #   SERVICE: ${{ secrets.CLOUDRUN_SERVICE }}
 #   BASE_VERSION: 1.0.0
+
 env:
   REGION: asia-south1
   LOCATION: asia-south1-docker.pkg.dev
@@ -31,53 +32,52 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-
     runs-on: ubuntu-latest
+
     steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      
-      # GCP setup
-        
-      - name: Authenticate to GCP
-        id: gcp-auth
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ env.GAR_CREDENTIALS_JSON }}
+    # GCP setup
 
-      - name: Install google cloud sdk
-        uses: 'google-github-actions/setup-gcloud@v2'
-        with:
-          version: '456.0.0'
+    - name: Authenticate to GCP
+      id: gcp-auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ env.GAR_CREDENTIALS_JSON }}
 
-      # Get docker image name and image path
+    - name: Install google cloud sdk
+      uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        version: '456.0.0'
 
-      - name: Get docker preview image name
-        id: get-docker-image
-        run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ env.BASE_VERSION }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+    # Get docker image name and image path
 
-      # Configure, Build Docker Preview Image and Publish to GAR
+    - name: Get docker preview image name
+      id: get-docker-image
+      run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ env.BASE_VERSION }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Build and Push Preview Image to GAR
-        id: build-and-publish
-        run: |
-          gcloud auth configure-docker ${{ env.LOCATION }}
-          docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
-          docker push ${{ steps.get-docker-image.outputs.image_path }}
+    # Configure, Build Docker Preview Image and Publish to GAR
 
+    - name: Build and Push Preview Image to GAR
+      id: build-and-publish
+      run: |
+        gcloud auth configure-docker ${{ env.LOCATION }}
+        docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
+        docker push ${{ steps.get-docker-image.outputs.image_path }}
+
+    - name: Deploy to Cloud Run
       # Deploy the Image with Cloud Run
 
-      - name: Deploy to Cloud Run
-        id: deploy
-        run: |
-          OUTPUT=gcloud-deploy-output.log
-          gcloud run deploy ${{ env.SERVICE }} \
-            --image ${{ steps.get-docker-image.outputs.image_path }} \
-            --project cloud-run-deploy-433807 \
-            --service-account cloud-run-deploy@cloud-run-deploy-433807.iam.gserviceaccount.com \
-            --region ${{ env.REGION }} \
-            --allow-unauthenticated \
-            --update-labels managed-by=github-actions \
-            --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
-          cat $OUTPUT
+      id: deploy
+      run: |
+        OUTPUT=gcloud-deploy-output.log
+        gcloud run deploy ${{ env.SERVICE }} \
+          --image ${{ steps.get-docker-image.outputs.image_path }} \
+          --project falcon-deploy \
+          --service-account service-391724078127@serverless-robot-prod.iam.gserviceaccount.com \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --update-labels managed-by=github-actions \
+          --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+        cat $OUTPUT
