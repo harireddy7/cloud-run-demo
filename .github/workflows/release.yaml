@@ -73,8 +73,8 @@ jobs:
         OUTPUT=gcloud-deploy-output.log
         gcloud run deploy ${{ env.SERVICE }} \
           --image ${{ steps.get-docker-image.outputs.image_path }} \
-          --project falcon-deploy \
-          --service-account cloud-run@falcon-deploy.iam.gserviceaccount.com \
+          --project kitchen-deployment \
+          --service-account cloud-run@kitchen-deployment.iam.gserviceaccount.com \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
           --update-labels managed-by=github-actions \
