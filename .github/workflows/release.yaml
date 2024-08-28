@@ -45,7 +45,6 @@ jobs:
     # Build and Push to Artifact Repo with Admin Keys
 
     - name: Authenticate to GCP with ADMIN
-      id: gcp-auth
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GAR_ADMIN_KEYS_JSON }}
@@ -68,7 +67,6 @@ jobs:
     # Deploy to Cloud Run with User Keys
 
     - name: Authenticate to GCP with USER
-      id: gcp-auth
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GAR_USER_KEYS_JSON }}
