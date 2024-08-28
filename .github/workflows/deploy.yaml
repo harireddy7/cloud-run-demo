@@ -27,15 +27,15 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Install google cloud sdk
-      uses: 'google-github-actions/setup-gcloud@v2'
-      with:
-        version: '456.0.0'
-
     - name: Authenticate to GCP with USER
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GAR_USER_KEYS_JSON }}
+
+    - name: Install google cloud sdk
+      uses: 'google-github-actions/setup-gcloud@v2'
+      with:
+        version: '456.0.0'
 
     - name: Get docker preview image name
       id: get-docker-image
