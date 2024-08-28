@@ -13,6 +13,8 @@ function App() {
           <li>Grant project 1 account the cloud run service agent access in the project 2 service account</li>
           <li>Add project 2 service account access to Artifact Registry Reader role in project 1</li>
         </ol>
+
+        <div>Auth with both accounts</div>
       </header>
     </div>
   );
