@@ -8,11 +8,12 @@ on:
   pull_request:
     branches:
       - main
-    types: [opened, synchronize, reopened, labeled]
+  pull_request_target:
+    types: [labeled]
 
 jobs:
-  test-and-build:
-    name: Run unit tests and build the app
+  on-every-pr:
+    name: Run on every PR
     runs-on: ubuntu-latest
 
     steps:
@@ -22,12 +23,14 @@ jobs:
       - name: Log github context
         run: echo "${{ toJson(github) }}"
 
-  deploy-preview:
-    needs: test-and-build
-    if: ${{ github.event.label.name == 'preview' }}
-    name: Publish and deploy preview image to cloud run
+  preview:
+    if: contains(github.event.pull_request.labels.*.name, 'preview')
+    needs: on-every-pr
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check label
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log github context (preview)
         run: echo "${{ toJson(github) }}"
