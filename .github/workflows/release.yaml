@@ -45,7 +45,7 @@ jobs:
       id: build-and-publish
       run: |
         gcloud auth configure-docker ${{ env.LOCATION }}
-        docker build -t ${{ steps.get-docker-image.outputs.image_path }} ./
+        docker build -t ${{ steps.get-docker-image.outputs.image_path }} --build-arg VERSION=${{ env.BASE_VERSION }}-${{ github.run_number }} ./
         docker push ${{ steps.get-docker-image.outputs.image_path }}
 
     - name: Deploy to Cloud Run

@@ -13,11 +13,11 @@ RUN yarn install --frozen-lockfile
 
 # RUN echo REACT_APP_BE_API_URL=$REACT_APP_BE_API_URL >> .env && REACT_APP_ENV=$REACT_APP_BE_API_URL >> .env
 
+# Build time args
 ARG VERSION
 
+# container env variables
 ENV VERSION=${VERSION}
-
-RUN echo ${VERSION}
 
 COPY . ./
 
