@@ -12,7 +12,7 @@ on:
 
 jobs:
   on-every-pr:
-    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && github.event.label.name == 'preview') }}
     runs-on: ubuntu-latest
 
     steps:
