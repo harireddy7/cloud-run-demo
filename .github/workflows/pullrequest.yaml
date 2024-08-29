@@ -8,12 +8,11 @@ on:
   pull_request:
     branches:
       - main
-  pull_request_target:
-    types: [labeled]
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
   on-every-pr:
-    name: Run on every PR
+    if: ${{ github.event.action != 'labeled' || (github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'preview')) }}
     runs-on: ubuntu-latest
 
     steps:
