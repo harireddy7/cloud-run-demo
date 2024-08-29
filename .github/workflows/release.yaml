@@ -54,8 +54,6 @@ jobs:
         OUTPUT=gcloud-deploy-output.log
         gcloud run deploy ${{ env.SERVICE }} \
           --image ${{ steps.get-docker-image.outputs.image_path }} \
-          --service-account deployment@user-deploy.iam.gserviceaccount.com \
-          --project user-deploy \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
           --update-labels managed-by=github-actions \
