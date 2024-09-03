@@ -49,3 +49,4 @@ jobs:
               labels: 'preview',
             });
             console.log(pullRequests)
+            console.log(pullRequests.map(pr => pr.labels).flat())
