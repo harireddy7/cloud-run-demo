@@ -40,8 +40,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            console.log(github);
-            console.log(context);
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -50,3 +48,8 @@ jobs:
             });
             console.log(pullRequests)
             console.log(pullRequests.map(pr => pr.labels).flat())
+            console.log("===============================================================================================")
+            const previewPRs = pullRequests.filter(pr => pr.labels.find(label => label.name === 'preview'))
+            console.log("===============================================================================================")
+            console.log("===============================================================================================")
+            console.log(previewPRs)
