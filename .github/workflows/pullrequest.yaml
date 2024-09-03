@@ -7,7 +7,7 @@ name: Pull Request - Build when a pull request is raised against main branch
 on:
   pull_request:
     branches:
-      - main
+      - main2
     types: [opened, synchronize, reopened, labeled]
 
 jobs:

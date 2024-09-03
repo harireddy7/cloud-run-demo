@@ -5,7 +5,7 @@ name: Release - Build release image and Deploy to Cloud Run
 on:
   push:
     branches:
-    - main
+    - main2
 
 env:
   REGION: asia-south1
