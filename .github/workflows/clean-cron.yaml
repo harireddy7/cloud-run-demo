@@ -48,3 +48,4 @@ jobs:
               state: 'open',
               labels: 'preview',
             });
+            console.log(pullRequests)
