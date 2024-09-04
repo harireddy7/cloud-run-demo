@@ -7,7 +7,7 @@ name: Pull Request - Build when a pull request is raised against main branch
 on:
   pull_request:
     branches:
-      - main2
+      - main
     types: [opened, synchronize, reopened, labeled]
 
 jobs:
@@ -19,15 +19,29 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Log github context
-        run: echo "${{ toJson(github) }}"
+      - name: Use Node.js 21.2
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21.2'
 
-  deploy-preview:
-    needs: test-and-build
-    if: ${{ github.event.label.name == 'preview' }}
-    name: Publish and deploy preview image to cloud run
-    runs-on: ubuntu-latest
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
 
-    steps:
-      - name: Check label
-        run: echo "${{ toJson(github) }}"
+      - name: Build
+        run: yarn build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-assets
+          path: dist
+
+  # deploy-preview:
+  #   needs: test-and-build
+  #   if: ${{ github.event.label.name == 'preview' }}
+  #   name: Publish and deploy preview image to cloud run
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Check label
+  #       run: echo "${{ toJson(github) }}"
