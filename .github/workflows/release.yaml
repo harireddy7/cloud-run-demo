@@ -27,10 +27,11 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Log github context
-      run: echo $JSON
-      env:
-        JSON: ${{ toJSON(github) }}
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-assets
+        path: build
 
     # - name: Authenticate to GCP
     #   uses: google-github-actions/auth@v2
