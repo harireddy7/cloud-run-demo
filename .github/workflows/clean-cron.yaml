@@ -49,7 +49,10 @@ jobs:
             const devOpenPRBranches = pullRequests.filter(pr => {
               const lastUpdatedAt = +(new Date(pr.updated_at));
               return pr.base.ref === 'main' && Date.now() - lastUpdatedAt > prLastUpdatedLimit;
-            }).map(pr => pr.head.ref.split('/').slice(2)[0]) || pr.head.ref;
+            }).map(pr => {
+              console.log(pr.head.ref)
+              return pr.head.ref.split('/').slice(2)[0] || pr.head.ref;
+            });
             return devOpenPRBranches;
 
       - name: Log branches of Open PRs more than 1 hour
