@@ -36,16 +36,22 @@ jobs:
           version: '456.0.0'
 
       - name: Find Open PRs with Preview Label
-        id: find_prs
+        id: find-open-prs-branches
         uses: actions/github-script@v7
         with:
           script: |
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open',
-              labels: 'preview',
+              state: 'open'
             });
-            console.log(pullRequests)
-            const devOpenPRBranches = pullRequests.filter(pr => pr.base.ref === 'main').map(pr => pr.head.ref)
-            console.log(devOpenPRBranches)
+            const prLastUpdatedLimit = 24 * 60 * 60 * 1000; // 24 hours
+            const devOpenPRBranches = pullRequests.filter(pr => {
+              const lastUpdatedAt = +(new Date(pr.updated_at));
+              return pr.base.ref === 'main' && Date.now() - lastUpdatedAt > prLastUpdatedLimit;
+            }).map(pr => pr.head.ref);
+            return devOpenPRBranches;
+      
+      - name: Log branches of Open PRs more than 1 hour
+        run: echo ${{ steps.find-open-prs-branches.outputs.result }}
+
