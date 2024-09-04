@@ -47,7 +47,5 @@ jobs:
               labels: 'preview',
             });
             console.log(pullRequests)
-            # const previewPRs = pullRequests.filter(pr => pr.labels.find(label => label.name === 'preview'))
-            # console.log(previewPRs)
             const devOpenPRBranches = pullRequests.filter(pr => pr.base.ref === 'main').map(pr => pr.head.ref)
             console.log(devOpenPRBranches)
