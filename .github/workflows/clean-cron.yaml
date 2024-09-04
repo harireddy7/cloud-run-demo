@@ -47,9 +47,7 @@ jobs:
               labels: 'preview',
             });
             console.log(pullRequests)
-            console.log(pullRequests.map(pr => pr.labels).flat())
-            console.log("===============================================================================================")
-            const previewPRs = pullRequests.filter(pr => pr.labels.find(label => label.name === 'preview'))
-            console.log("===============================================================================================")
-            console.log("===============================================================================================")
-            console.log(previewPRs)
+            # const previewPRs = pullRequests.filter(pr => pr.labels.find(label => label.name === 'preview'))
+            # console.log(previewPRs)
+            const devOpenPRBranches = pullRequests.filter(pr => pr.base.ref === 'main').map(pr => pr.head.ref)
+            console.log(devOpenPRBranches)
