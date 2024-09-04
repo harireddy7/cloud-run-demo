@@ -24,8 +24,10 @@ jobs:
         with:
           node-version: '21.2'
 
-      - name: log git context
-        run: echo "${{ toJson(github) }}"
+      - name: Log github context
+        run: echo $JSON
+        env:
+          JSON: ${{ toJSON(github) }}
 
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
