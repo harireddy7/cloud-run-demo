@@ -5,7 +5,7 @@ name: Release - Build release image and Deploy to Cloud Run
 on:
   push:
     branches:
-    - main2
+    - main
 
 env:
   REGION: asia-south1
@@ -27,35 +27,40 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Authenticate to GCP
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GAR_JSON_KEY }}
+    - name: Log github context
+      run: echo $JSON
+      env:
+        JSON: ${{ toJSON(github) }}
 
-    - name: Install google cloud sdk
-      uses: 'google-github-actions/setup-gcloud@v2'
-      with:
-        version: '456.0.0'
+    # - name: Authenticate to GCP
+    #   uses: google-github-actions/auth@v2
+    #   with:
+    #     credentials_json: ${{ secrets.GAR_JSON_KEY }}
 
-    - name: Get docker preview image name
-      id: get-docker-image
-      run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ env.BASE_VERSION }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
+    # - name: Install google cloud sdk
+    #   uses: 'google-github-actions/setup-gcloud@v2'
+    #   with:
+    #     version: '456.0.0'
 
-    - name: Build and Push Preview Image to GAR
-      id: build-and-publish
-      run: |
-        gcloud auth configure-docker ${{ env.LOCATION }}
-        docker build -t ${{ steps.get-docker-image.outputs.image_path }} --build-arg VERSION=${{ env.BASE_VERSION }}-${{ github.run_number }} ./
-        docker push ${{ steps.get-docker-image.outputs.image_path }}
+    # - name: Get docker preview image name
+    #   id: get-docker-image
+    #   run: echo "image_path=${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}:${{ env.BASE_VERSION }}-${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-    - name: Deploy to Cloud Run
-      id: deploy
-      run: |
-        OUTPUT=gcloud-deploy-output.log
-        gcloud run deploy ${{ env.SERVICE }} \
-          --image ${{ steps.get-docker-image.outputs.image_path }} \
-          --region ${{ env.REGION }} \
-          --allow-unauthenticated \
-          --update-labels managed-by=github-actions \
-          --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
-        cat $OUTPUT
+    # - name: Build and Push Preview Image to GAR
+    #   id: build-and-publish
+    #   run: |
+    #     gcloud auth configure-docker ${{ env.LOCATION }}
+    #     docker build -t ${{ steps.get-docker-image.outputs.image_path }} --build-arg VERSION=${{ env.BASE_VERSION }}-${{ github.run_number }} ./
+    #     docker push ${{ steps.get-docker-image.outputs.image_path }}
+
+    # - name: Deploy to Cloud Run
+    #   id: deploy
+    #   run: |
+    #     OUTPUT=gcloud-deploy-output.log
+    #     gcloud run deploy ${{ env.SERVICE }} \
+    #       --image ${{ steps.get-docker-image.outputs.image_path }} \
+    #       --region ${{ env.REGION }} \
+    #       --allow-unauthenticated \
+    #       --update-labels managed-by=github-actions \
+    #       --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+    #     cat $OUTPUT
