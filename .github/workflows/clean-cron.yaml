@@ -43,11 +43,11 @@ jobs:
               repo: context.repo.repo,
               state: 'open'
             });
-            const prLastUpdatedLimit = 5 * 60 * 1000; // 2 hours
+            const prLastUpdatedLimit = 1 * 60 * 1000; // 2 hours
             const devOpenPRBranches = pullRequests.filter(pr => {
               const lastUpdatedAt = +(new Date(pr.updated_at));
               return pr.base.ref === 'main' && Date.now() - lastUpdatedAt > prLastUpdatedLimit;
-            }).map(pr => pr.head.ref.split('/').slice(2)[0] || pr.head.ref);
+            }).map(pr => (pr.head.ref.split('/').slice(2)[0] || pr.head.ref || "").toLowerCase());
             return devOpenPRBranches;
 
       - name: Delete cloud run services of long opened PR branches
@@ -56,7 +56,7 @@ jobs:
           echo "$BRANCHES"
           echo "$branches"
           for branch in $branches; do
-            SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
+            SERVICE=$(gcloud run services list --region asia-south1 --format="value(metadata.name)" --filter="metadata.name ~ JIRA-2222")
             echo "$SERVICE"
             echo "Service for $branch is $SERVICE"
             # if [ ! -z $SERVICE ]; then
