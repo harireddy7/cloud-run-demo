@@ -59,7 +59,7 @@ jobs:
       - name: Log branches of Open PRs more than 1 hour
         run: |
           echo "$BRANCHES"
-          branches=$(jq '.[]' <<< "$BRANCHES");
+          branches=$(jq '.[]' <<< "$BRANCHES")
           for branch in $branches; do
             echo "Branch is $branch"
           done
