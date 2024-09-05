@@ -39,7 +39,6 @@ jobs:
         id: open-prs-branches
         uses: actions/github-script@v7
         with:
-          result-encoding: string
           script: |
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -59,25 +58,27 @@ jobs:
       - name: Log branches of Open PRs more than 1 hour
         run: |
           echo ${{ steps.open-prs-branches.outputs.result }}
+          echo "($(echo ${{ steps.open-prs-branches.outputs.result }} | jq -r '.[]'))"
+          echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq -r '.[]'))" >> $GITHUB_OUTPUT
 
-      - name: Delete cloud run services of long opened PR branches
-        run: |
-          for branch in ${{ steps.open-prs-branches.outputs.result }}; do
-            SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
-            if [ ! -z $SERVICE ]; then
-              echo "cloud run service $SERVICE for $branch found"
-              echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
-            else
-              echo "cloud run service $SERVICE for $branch not found"
-            fi
-          done
+      # - name: Delete cloud run services of long opened PR branches
+      #   run: |
+      #     for branch in ${{ steps.open-prs-branches.outputs.result }}; do
+      #       SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
+      #       if [ ! -z $SERVICE ]; then
+      #         echo "cloud run service $SERVICE for $branch found"
+      #         echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
+      #       else
+      #         echo "cloud run service $SERVICE for $branch not found"
+      #       fi
+      #     done
 
-      - name: Delete preview docker images of long opened PR branches
-        run: |
-          for branch in ${{ steps.open-prs-branches.outputs.result }}; do
-            TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ ${{steps.open-prs-branches.outputs.result}}")
-            echo "tags for $branch are $TAGS"
-            for tag in $TAGS; do
-              echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
-            done
-          done
+      # - name: Delete preview docker images of long opened PR branches
+      #   run: |
+      #     for branch in ${{ steps.open-prs-branches.outputs.result }}; do
+      #       TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ ${{steps.open-prs-branches.outputs.result}}")
+      #       echo "tags for $branch are $TAGS"
+      #       for tag in $TAGS; do
+      #         echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
+      #       done
+      #     done
