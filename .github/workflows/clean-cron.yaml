@@ -11,9 +11,7 @@ on:
 env:
   REGION: asia-south1
   LOCATION: asia-south1-docker.pkg.dev
-  PROJECT_ID: cloud-run-preview-demo
-  REPO: cloud-run-repo
-  IMAGE: preview-demo
+  IMAGE_PATH: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/preview-demo
   SERVICE: preview-demo
   BASE_VERSION: 1.0.0
 
@@ -45,11 +43,11 @@ jobs:
               repo: context.repo.repo,
               state: 'open'
             });
-            const prLastUpdatedLimit = 50 * 60 * 1000; // 2 hours
+            const prLastUpdatedLimit = 1 * 60 * 1000; // 2 hours
             const devOpenPRBranches = pullRequests.filter(pr => {
               const lastUpdatedAt = +(new Date(pr.updated_at));
               return pr.base.ref === 'main' && Date.now() - lastUpdatedAt > prLastUpdatedLimit;
-            }).map(pr => pr.head.ref.split('/').slice(2)[0] || pr.head.ref);
+            }).map(pr => (pr.head.ref.split('/').slice(2)[0] || pr.head.ref || "").toLowerCase());
             return devOpenPRBranches;
 
       - name: Delete cloud run services of long opened PR branches
@@ -59,9 +57,9 @@ jobs:
           echo "$branches"
           for branch in $branches; do
             SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
+            echo "Service for $branch is $SERVICE"
             if [ ! -z $SERVICE ]; then
-              echo "cloud run service $SERVICE for $branch found"
-              echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
+              gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet
             else
               echo "cloud run service $SERVICE for $branch not found"
             fi
@@ -73,11 +71,11 @@ jobs:
         run: |
           branches=$(jq '.[]' <<< "$BRANCHES")
           for branch in $branches; do
-            TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ $branch")
+            TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE_PATH }} --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
-            # for tag in $TAGS; do
-            #   echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
-            # done
+            for tag in $TAGS; do
+              gcloud artifacts docker images delete ${{ env.IMAGE_PATH }}:$tag
+            done
           done
         env:
           BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
