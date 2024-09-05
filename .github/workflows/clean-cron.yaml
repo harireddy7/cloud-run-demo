@@ -64,7 +64,7 @@ jobs:
             echo "Branch is $branch"
           done
         env:
-          BRANCHES: ${{ steps.open-prs-branches.outputs.branches }}
+          BRANCHES: ${{ steps.open-prs-branches.outputs.result }}
 
           # echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq 'splits(", *")'))" >> $GITHUB_OUTPUT
 
