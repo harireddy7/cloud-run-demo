@@ -25,21 +25,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.GAR_JSON_KEY }}
+      # - name: Authenticate to GCP
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     credentials_json: ${{ secrets.GAR_JSON_KEY }}
 
-      - name: Install google cloud sdk
-        uses: 'google-github-actions/setup-gcloud@v2'
-        with:
-          version: '456.0.0'
+      # - name: Install google cloud sdk
+      #   uses: 'google-github-actions/setup-gcloud@v2'
+      #   with:
+      #     version: '456.0.0'
 
       - name: Find Open PRs with Preview Label
         id: open-prs-branches
         uses: actions/github-script@v7
         with:
-          result-encoding: string
+          # result-encoding: string
           script: |
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -54,12 +54,18 @@ jobs:
               console.log(pr.head.ref)
               return pr.head.ref.split('/').slice(2)[0] || pr.head.ref;
             });
-            return devOpenPRBranches;
+            return JSON.stringify(devOpenPRBranches);
 
       - name: Log branches of Open PRs more than 1 hour
         run: |
-          echo ${{ steps.open-prs-branches.outputs.result }}
-          echo "($(echo "${{ steps.open-prs-branches.outputs.result }}" | jq 'splits(", *")'))"
+          echo "$BRANCHES"
+          branches=$(jq '.[]' <<< "$BRANCHES");
+          for branch in $branches; do
+            echo "Branch is $branch"
+          done
+        env:
+          BRANCHES: ${{ steps.open-prs-branches.outputs.branches }}
+
           # echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq 'splits(", *")'))" >> $GITHUB_OUTPUT
 
       # - name: Delete cloud run services of long opened PR branches
