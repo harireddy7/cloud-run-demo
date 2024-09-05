@@ -56,15 +56,15 @@ jobs:
           echo "$BRANCHES"
           echo "$branches"
           for branch in $branches; do
-            SERVICE=$(gcloud run services list --region asia-south1 --format="value(metadata.name)" --filter="metadata.name ~ JIRA-2222")
+            SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
             echo "$SERVICE"
             echo "Service for $branch is $SERVICE"
-            # if [ ! -z $SERVICE ]; then
-            #   echo "cloud run service $SERVICE for $branch found"
-            #   echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
-            # else
-            #   echo "cloud run service $SERVICE for $branch not found"
-            # fi
+            if [ ! -z $SERVICE ]; then
+              echo "cloud run service $SERVICE for $branch found"
+              echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
+            else
+              echo "cloud run service $SERVICE for $branch not found"
+            fi
           done
         env:
           BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
