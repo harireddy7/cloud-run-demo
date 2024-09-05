@@ -57,11 +57,9 @@ jobs:
           echo "$branches"
           for branch in $branches; do
             SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
-            echo "$SERVICE"
             echo "Service for $branch is $SERVICE"
             if [ ! -z $SERVICE ]; then
-              echo "cloud run service $SERVICE for $branch found"
-              echo "gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet"
+              gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet
             else
               echo "cloud run service $SERVICE for $branch not found"
             fi
@@ -76,7 +74,7 @@ jobs:
             TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE_PATH }} --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
             for tag in $TAGS; do
-              echo "gcloud artifacts docker images delete ${{ env.IMAGE_PATH }}:$tag"
+              gcloud artifacts docker images delete ${{ env.IMAGE_PATH }}:$tag
             done
           done
         env:
