@@ -28,6 +28,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Log github context
+        run: echo $JSON
+        env:
+          JSON: ${{ toJSON(github) }}
+
       - name: Install YQ/JQ
         run: |
           YQ=4.16.1
