@@ -45,7 +45,7 @@ jobs:
               repo: context.repo.repo,
               state: 'open'
             });
-            const prLastUpdatedLimit = 2 * 60 * 60 * 1000; // 2 hours
+            const prLastUpdatedLimit = 50 * 60 * 1000; // 2 hours
             const devOpenPRBranches = pullRequests.filter(pr => {
               const lastUpdatedAt = +(new Date(pr.updated_at));
               return pr.base.ref === 'main' && Date.now() - lastUpdatedAt > prLastUpdatedLimit;
@@ -75,9 +75,9 @@ jobs:
           for branch in $branches; do
             TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
-            for tag in $TAGS; do
-              echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
-            done
+            # for tag in $TAGS; do
+            #   echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
+            # done
           done
-          env:
-            BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
+        env:
+          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
