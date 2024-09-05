@@ -59,7 +59,7 @@ jobs:
       - name: Log branches of Open PRs more than 1 hour
         run: |
           echo ${{ steps.open-prs-branches.outputs.result }}
-          echo "($(echo ${{ steps.open-prs-branches.outputs.result }} | jq -r '.[]'))"
+          echo "($(echo ${{ steps.open-prs-branches.outputs.result }} | jq 'splits(", *")'))"
           echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq 'splits(", *")'))" >> $GITHUB_OUTPUT
 
       # - name: Delete cloud run services of long opened PR branches
