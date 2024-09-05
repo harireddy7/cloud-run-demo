@@ -52,21 +52,12 @@ jobs:
             }).map(pr => pr.head.ref.split('/').slice(2)[0] || pr.head.ref);
             return devOpenPRBranches;
 
-      - name: Log branches of Open PRs
-        id: open-pr-branches
-        run: |
-          echo "$BRANCHES"
-          branches=$(jq '.[]' <<< "$BRANCHES")
-          for branch in $branches; do
-            echo "Branch is $branch"
-          done
-          echo "branches=$branches" >> $GITHUB_OUTPUT
-        env:
-          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
-
       - name: Delete cloud run services of long opened PR branches
         run: |
-          for branch in $BRANCHES; do
+          branches=$(jq '.[]' <<< "$BRANCHES")
+          echo "$BRANCHES"
+          echo "$branches"
+          for branch in $branches; do
             SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
             if [ ! -z $SERVICE ]; then
               echo "cloud run service $SERVICE for $branch found"
@@ -76,11 +67,12 @@ jobs:
             fi
           done
         env:
-          BRANCHES: ${{ steps.open-pr-branches.outputs.branches }}
+          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
 
       - name: Delete preview docker images
         run: |
-          for branch in $BRANCHES; do
+          branches=$(jq '.[]' <<< "$BRANCHES")
+          for branch in $branches; do
             TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
             for tag in $TAGS; do
@@ -88,4 +80,4 @@ jobs:
             done
           done
           env:
-            BRANCHES: ${{ steps.open-pr-branches.outputs.branches }}
+            BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
