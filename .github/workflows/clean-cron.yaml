@@ -60,7 +60,7 @@ jobs:
         run: |
           echo ${{ steps.open-prs-branches.outputs.result }}
           echo "($(echo ${{ steps.open-prs-branches.outputs.result }} | jq -r '.[]'))"
-          echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq -r '.[]'))" >> $GITHUB_OUTPUT
+          echo "bash_array=($(echo ${{ steps.open-prs-branches.outputs.result }} | jq 'splits(", *")'))" >> $GITHUB_OUTPUT
 
       # - name: Delete cloud run services of long opened PR branches
       #   run: |
