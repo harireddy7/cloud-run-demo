@@ -54,7 +54,7 @@ jobs:
               console.log(pr.head.ref)
               return pr.head.ref.split('/').slice(2)[0] || pr.head.ref;
             });
-            return JSON.stringify(devOpenPRBranches);
+            return devOpenPRBranches;
 
       - name: Log branches of Open PRs more than 1 hour
         run: |
