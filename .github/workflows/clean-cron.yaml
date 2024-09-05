@@ -79,5 +79,5 @@ jobs:
             #   echo "gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag"
             # done
           done
-          env:
-            BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
+        env:
+          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
