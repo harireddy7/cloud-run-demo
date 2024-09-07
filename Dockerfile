@@ -8,14 +8,20 @@ COPY yarn.lock ./yarn.lock
 
 RUN yarn install --frozen-lockfile
 
-ARG REACT_APP_BE_API_URL
-ARG REACT_APP_ENV
+# ARG REACT_APP_BE_API_URL
+# ARG REACT_APP_ENV
 
-RUN echo REACT_APP_BE_API_URL=$REACT_APP_BE_API_URL >> .env && REACT_APP_ENV=$REACT_APP_BE_API_URL >> .env
+# RUN echo REACT_APP_BE_API_URL=$REACT_APP_BE_API_URL >> .env && REACT_APP_ENV=$REACT_APP_BE_API_URL >> .env
+
+# Build time args
+ARG VERSION
+
+# container env variables
+ENV VERSION=${VERSION}
 
 COPY . ./
 
-RUN yarn build
+RUN REACT_APP_VERSION=${VERSION} yarn build
 
 FROM nginx:stable-alpine
 

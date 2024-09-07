@@ -1,3 +1,3 @@
 # Cloud Run Demo
 
-A demo app to learn cloud run product from GCP to test preview environments
+A demo app to learn google's Cloud Run service to test preview environments.
