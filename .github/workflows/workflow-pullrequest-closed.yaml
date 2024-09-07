@@ -1,0 +1,19 @@
+name: Pull Request - Build when a pull request is raised against main branch
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  build-preview-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Log github context
+      run: echo $JSON
+      env:
+        JSON: ${{ toJSON(github) }}
