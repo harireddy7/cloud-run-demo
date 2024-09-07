@@ -54,7 +54,7 @@ jobs:
       run: |
         TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ ${{steps.parse-branch-name.outputs.branch_name}}")
         for tag in $TAGS; do
-          gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag
+          gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag --quiet
         done
 
     - name: Verify cloud run service and preview image of branch are deleted
