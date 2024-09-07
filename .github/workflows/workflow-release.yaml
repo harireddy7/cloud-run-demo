@@ -1,0 +1,43 @@
+name: Release - Build and publish release image and Deploy to Cloud Run. Clean up preview image and cloud run service for the merged PR.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  push:
+    branches: [main]
+
+jobs:
+  build-release-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Log if merged
+      if : ${{ github.event.pull_request.merged }}
+      run: echo "Merged PR to ${{ github.event.pull_request.base.ref }} branch"
+
+    - name: Log if closed
+      if : ${{ !github.event.pull_request.merged }}
+      run: echo "Closed PR to ${{ github.event.pull_request.base.ref }} branch"
+
+    - name: Log github context
+      run: echo $JSON
+      env:
+        JSON: ${{ toJSON(github) }}
+
+
+# jobs:
+#   build-publish-release:
+#     name: Release docker image and deplot to cloud run
+#     uses: ./.github/workflows/call-release.yaml
+#     secrets: inherit
+
+#   clean-merged-pr:
+#     name: Clean image and cloud run service for merged PR
+#     needs: build-publish-release
+#     if: ${{ github.event.pull_request.merged }}
+#     uses: ./.github/workflows/call-clean-PR-image.yaml
+#     secrets: inherit
+    
