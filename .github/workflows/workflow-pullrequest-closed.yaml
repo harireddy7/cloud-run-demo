@@ -15,11 +15,11 @@ jobs:
 
     - name: Log if merged
       if : ${{ github.event.pull_request.merged }}
-      run: echo "Merged PR to ${{ github.event.pull_request.base.ref }} branch"
+      run: echo "Merged PR to ${{ github.event.pull_request.base.ref }} branch, Clean up PR image and cloud run service."
 
     - name: Log if closed
       if : ${{ !github.event.pull_request.merged }}
-      run: echo "Closed PR to ${{ github.event.pull_request.base.ref }} branch"
+      run: echo "Closed PR to ${{ github.event.pull_request.base.ref }} branch, Clean up PR image and cloud run service."
 
     - name: Log github context
       run: echo $JSON
