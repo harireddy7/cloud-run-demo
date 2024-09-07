@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-release-deploy:
+    if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -21,6 +22,18 @@ jobs:
     - name: Log if closed
       if : ${{ !github.event.pull_request.merged }}
       run: echo "Closed PR to ${{ github.event.pull_request.base.ref }} branch"
+
+    - name: Log github context
+      run: echo $JSON
+      env:
+        JSON: ${{ toJSON(github) }}
+
+  clean-merged-pr:
+    if: ${{ github.event.pull_request.merged || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
     - name: Log github context
       run: echo $JSON
