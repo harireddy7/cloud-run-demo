@@ -3,7 +3,7 @@ name: Pull Request - Build, Publish and deploy to Cloud Run when a pull request 
 on:
   pull_request:
     branches:
-      - main2
+      - main
     types: [opened, synchronize, reopened]
 
 env:
