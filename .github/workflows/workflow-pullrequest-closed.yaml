@@ -13,6 +13,14 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Log if merged
+      if : ${{ github.event.pull_request.merged }}
+      run: echo "Merged PR to ${{ github.event.pull_request.base.ref }} branch"
+
+    - name: Log if closed
+      if : ${{ !github.event.pull_request.merged }}
+      run: echo "Closed PR to ${{ github.event.pull_request.base.ref }} branch"
+
     - name: Log github context
       run: echo $JSON
       env:
