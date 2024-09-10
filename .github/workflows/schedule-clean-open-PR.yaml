@@ -52,7 +52,9 @@ jobs:
 
       - name: Parse inactive branches
         run: |
+          echo "$INACTIVE_BRANCHES"
           parsed_branches=$(jq '.[]' <<< "$INACTIVE_BRANCHES")
+          echo "$parsed_branches"
           echo "BRANCHES=$parsed_branches" >> $GITHUB_ENV
         env:
           INACTIVE_BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
