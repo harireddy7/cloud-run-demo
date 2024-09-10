@@ -23,6 +23,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set the multiline value in bash
+        id: step_one
+        run: |
+          {
+            echo 'JSON_RESPONSE<<EOF'
+            curl https://example.com
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+      - name: Log multiline value
+        run: |
+          echo "$JSON_RESPONSE"
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
