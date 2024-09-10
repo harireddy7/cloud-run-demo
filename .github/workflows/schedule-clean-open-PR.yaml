@@ -50,11 +50,16 @@ jobs:
             }).map(pr => (pr.head.ref.split('/').slice(2)[0] || pr.head.ref || "").toLowerCase());
             return devOpenPRBranches;
 
+      - name: Parse inactive branches
+        run: |
+          echo "BRANCHES=$(jq '.[]' <<< $INACTIVE_BRANCHES)" >> $GITHUB_ENV
+        env:
+          INACTIVE_BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
+
       - name: Delete cloud run services of long opened PR branches
         run: |
-          branches=$(jq '.[]' <<< "$BRANCHES")
-          echo "$branches"
-          for branch in $branches; do
+          echo "$BRANCHES"
+          for branch in $BRANCHES; do
             SERVICE=$(gcloud run services list --region $REGION --format="value(metadata.name)" --filter="metadata.name ~ $branch")
             echo "Service for $branch is $SERVICE"
             if [ ! -z $SERVICE ]; then
@@ -63,18 +68,13 @@ jobs:
               echo "cloud run service $SERVICE for $branch not found"
             fi
           done
-        env:
-          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
 
       - name: Delete preview docker images
         run: |
-          branches=$(jq '.[]' <<< "$BRANCHES")
-          for branch in $branches; do
+          for branch in $BRANCHES; do
             TAGS=$(gcloud artifacts docker tags list $IMAGE_PATH --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
             for tag in $TAGS; do
               gcloud artifacts docker images delete $IMAGE_PATH:$tag --quiet
             done
           done
-        env:
-          BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
