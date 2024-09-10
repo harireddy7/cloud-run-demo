@@ -74,4 +74,4 @@ jobs:
     - name: Comment Deployed URL
       uses: mshick/add-pr-comment@v2
       with:
-        message: Changes are deployed to preview environment - $DEPLOYMENT_URL
+        message: Changes are deployed to preview environment - ${{ env.DEPLOYMENT_URL }}
