@@ -23,19 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set the multiline value in bash
-        id: step_one
-        run: |
-          {
-            echo 'JSON_RESPONSE<<EOF'
-            curl https://example.com
-            echo EOF
-          } >> "$GITHUB_ENV"
-
-      - name: Log multiline value
-        run: |
-          echo "$JSON_RESPONSE"
-
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
@@ -66,16 +53,18 @@ jobs:
       - name: Parse inactive branches
         run: |
           echo "$INACTIVE_BRANCHES"
-          # parsed_branches=$(jq '.[]' <<< "$INACTIVE_BRANCHES")
-          # echo "$parsed_branches"
-          echo "BRANCHES=$INACTIVE_BRANCHES" >> $GITHUB_ENV
+          {
+            echo 'BRANCHES<<EOF'
+            jq '.[]' <<< "$INACTIVE_BRANCHES"
+            echo EOF
+          } >> $GITHUB_ENV
         env:
           INACTIVE_BRANCHES: ${{ steps.extract-open-prs.outputs.result }}
 
       - name: Delete cloud run services of long opened PR branches
         run: |
           echo "$BRANCHES"
-          for branch in $(jq '.[]' <<< "$INACTIVE_BRANCHES"); do
+          for branch in $BRANCHES; do
             SERVICE=$(gcloud run services list --region $REGION --format="value(metadata.name)" --filter="metadata.name ~ $branch")
             echo "Service for $branch is $SERVICE"
             if [ ! -z $SERVICE ]; then
@@ -87,7 +76,7 @@ jobs:
 
       - name: Delete preview docker images
         run: |
-          for branch in $(jq '.[]' <<< "$INACTIVE_BRANCHES"); do
+          for branch in $BRANCHES; do
             TAGS=$(gcloud artifacts docker tags list $IMAGE_PATH --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
             for tag in $TAGS; do
