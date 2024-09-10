@@ -12,6 +12,7 @@ env:
   LOCATION: asia-south1-docker.pkg.dev
   IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/preview
   SERVICE: preview
+  BRANCH_NAME: ""
 
 jobs:
   build-preview-deploy:
@@ -37,28 +38,28 @@ jobs:
 
     - name: Get closed PR branch name
       id: parse-branch-name
-      run: echo "branch_name=$(echo ${{ github.head_ref }} | sed 's|^[^/]*/[^/]*/*||' | sed 's/\//-/g' | sed 's/.*/\L&/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+      run: echo "BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's|^[^/]*/[^/]*/*||' | sed 's/\//-/g' | sed 's/.*/\L&/g' | tr -d '[:space:]')" >> $GITHUB_ENV
 
     - name: Delete cloud run service
-      if: ${{ steps.parse-branch-name.outputs.branch_name != '' }}
+      if: env.BRANCH_NAME != ''
       run: |
-        SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ ${{steps.parse-branch-name.outputs.branch_name}}")
+        SERVICE=$(gcloud run services list --region $REGION --format="value(metadata.name)" --filter="metadata.name ~ $BRANCH_NAME")
         if [ ! -z $SERVICE ]; then
-          gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet
+          gcloud run services delete $SERVICE --region $REGION --quiet
         else
           echo "Cloud run service $SERVICE - cloud run service not found"
         fi
 
     - name: Delete preview docker images of closed PR branch
-      if: ${{ steps.parse-branch-name.outputs.branch_name != '' }}
+      if: env.BRANCH_NAME != ''
       run: |
-        TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE }} --format="value(tag)" --filter="tag ~ ${{steps.parse-branch-name.outputs.branch_name}}")
+        TAGS=$(gcloud artifacts docker tags list $IMAGE --format="value(tag)" --filter="tag ~ $BRANCH_NAME")
         for tag in $TAGS; do
-          gcloud artifacts docker images delete ${{ env.IMAGE }}:$tag --quiet
+          gcloud artifacts docker images delete $IMAGE:$tag --quiet
         done
 
     - name: Verify cloud run service and preview image of branch are deleted
-      if: ${{ steps.parse-branch-name.outputs.branch_name != '' }}
+      if: env.BRANCH_NAME != ''
       run: |
-        gcloud run services list --region ${{ env.REGION }} --filter="metadata.name ~ ${{steps.parse-branch-name.outputs.branch_name}}"
-        gcloud artifacts docker tags list ${{ env.IMAGE }} --filter="tag ~ ${{steps.parse-branch-name.outputs.branch_name}}"
+        gcloud run services list --region $REGION --filter="metadata.name ~ $BRANCH_NAME"
+        gcloud artifacts docker tags list $IMAGE --filter="tag ~ $BRANCH_NAME"
