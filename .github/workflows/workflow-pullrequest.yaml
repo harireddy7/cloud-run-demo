@@ -10,7 +10,7 @@ on:
 env:
   REGION: asia-south1
   LOCATION: asia-south1-docker.pkg.dev
-  IMAGE_PATH: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/preview
+  IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/preview
   SERVICE: preview
 
 jobs:
@@ -42,36 +42,36 @@ jobs:
         credentials_json: ${{ secrets.GAR_JSON_KEY }}
 
     - name: Install google cloud sdk
-      uses: 'google-github-actions/setup-gcloud@v2'
+      uses: google-github-actions/setup-gcloud@v2
       with:
         version: '456.0.0'
 
     - name: Parse current branch name
       id: parse-branch-name
       run: |
-        echo "branch_name=$(echo ${{ github.head_ref }} | sed 's|^[^/]*/[^/]*/*||' | sed 's/\//-/g' | sed 's/.*/\L&/g' | tr -d '[:space:]')" >> $GITHUB_OUTPUT
-        echo "commit_sha=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_OUTPUT
+        echo "BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's|^[^/]*/[^/]*/*||' | sed 's/\//-/g' | sed 's/.*/\L&/g' | tr -d '[:space:]')" >> $GITHUB_ENV
+        echo "COMMIT_SHA=$(git rev-parse --short ${{ github.sha }})" >> $GITHUB_ENV
 
     - name: Get docker preview image name
       id: get-docker-image
-      run: echo "image_tag=${{ env.IMAGE_PATH }}:${{ steps.parse-branch-name.outputs.branch_name }}-${{ steps.parse-branch-name.outputs.commit_sha }}" >> $GITHUB_OUTPUT
+      run: echo "IMAGE_PATH=$IMAGE:$BRANCH_NAME-$COMMIT_SHA" >> $GITHUB_ENV
 
     - name: Build and Push Preview Image to GAR
       id: build-and-publish
       run: |
-        gcloud auth configure-docker ${{ env.LOCATION }}
-        docker build -t ${{ steps.get-docker-image.outputs.image_tag }} ./
-        docker push ${{ steps.get-docker-image.outputs.image_tag }}
+        gcloud auth configure-docker $LOCATION
+        docker build -t $IMAGE_PATH ./
+        docker push $IMAGE_PATH
 
     - name: Deploy to Cloud Run
       id: deploy
       run: |
         OUTPUT=gcloud-deploy-output.log
-        gcloud run deploy ${{ env.SERVICE }}-${{ steps.parse-branch-name.outputs.branch_name }} --image ${{ steps.get-docker-image.outputs.image_tag }} --region ${{ env.REGION }} --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
+        gcloud run deploy $SERVICE-$BRANCH_NAME --image $IMAGE_PATH --region $REGION --allow-unauthenticated --update-labels managed-by=github-actions --format="flattened(status.url, status.traffic[0].url)" > $OUTPUT
         cat $OUTPUT
-        echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_OUTPUT
+        echo "DEPLOYMENT_URL=$(yq eval '.url' $OUTPUT)" >> $GITHUB_ENV
 
     - name: Comment Deployed URL
       uses: mshick/add-pr-comment@v2
       with:
-        message: Changes are deployed to preview environment - ${{ steps.deploy.outputs.DEPLOYMENT_URL }}
+        message: Changes are deployed to preview environment - $DEPLOYMENT_URL
