@@ -53,13 +53,12 @@ jobs:
       - name: Delete cloud run services of long opened PR branches
         run: |
           branches=$(jq '.[]' <<< "$BRANCHES")
-          echo "$BRANCHES"
           echo "$branches"
           for branch in $branches; do
-            SERVICE=$(gcloud run services list --region ${{ env.REGION }} --format="value(metadata.name)" --filter="metadata.name ~ $branch")
+            SERVICE=$(gcloud run services list --region $REGION --format="value(metadata.name)" --filter="metadata.name ~ $branch")
             echo "Service for $branch is $SERVICE"
             if [ ! -z $SERVICE ]; then
-              gcloud run services delete $SERVICE --region ${{ env.REGION }} --quiet
+              gcloud run services delete $SERVICE --region $REGION --quiet
             else
               echo "cloud run service $SERVICE for $branch not found"
             fi
@@ -71,10 +70,10 @@ jobs:
         run: |
           branches=$(jq '.[]' <<< "$BRANCHES")
           for branch in $branches; do
-            TAGS=$(gcloud artifacts docker tags list ${{ env.IMAGE_PATH }} --format="value(tag)" --filter="tag ~ $branch")
+            TAGS=$(gcloud artifacts docker tags list $IMAGE_PATH --format="value(tag)" --filter="tag ~ $branch")
             echo "tags for $branch are $TAGS"
             for tag in $TAGS; do
-              gcloud artifacts docker images delete ${{ env.IMAGE_PATH }}:$tag --quiet
+              gcloud artifacts docker images delete $IMAGE_PATH:$tag --quiet
             done
           done
         env:

@@ -12,6 +12,7 @@ env:
   LOCATION: asia-south1-docker.pkg.dev
   IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/preview
   SERVICE: preview
+  DEPLOYMENT_URL: ""
 
 jobs:
   build-preview-deploy:
