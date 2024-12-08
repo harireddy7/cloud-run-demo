@@ -1,0 +1,32 @@
+# Release - Build and publish release image and Deploy to Cloud Run.
+name: Release to dev
+
+on:
+  push:
+    branches:
+    - dev
+
+env:
+  REGION: asia-south1
+  LOCATION: asia-south1-docker.pkg.dev
+  IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/release
+  SERVICE: release
+
+jobs:
+  build-publish-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Log github context
+      run: echo $JSON
+      env:
+        JSON: ${{ toJSON(github) }}
+
+    - name: Install packages
+      run: yarn install --frozen-lockfile
+
+    - name: Dry run Semantic release to get next version
+      run: npx semantic-release --dry-run
