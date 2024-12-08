@@ -34,7 +34,7 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: Dry run Semantic release to get next version
-      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} yarn semantic-release
+      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} npx semantic-release --dry-run
 
     - name: Extract next release tag
-      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} yarn semantic-release --dry-run --verbose | grep -oP 'Skip \\K.* tag creation in dry-run mode' | cut -d ' ' -f 1 || echo 'NotFound'
+      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} npx semantic-release --dry-run --verbose | grep -oP 'Skip \\K.* tag creation in dry-run mode' | cut -d ' ' -f 1 || echo 'NotFound'
