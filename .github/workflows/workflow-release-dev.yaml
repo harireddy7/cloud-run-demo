@@ -11,6 +11,7 @@ env:
   LOCATION: asia-south1-docker.pkg.dev
   IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/release
   SERVICE: release
+  DEPLOYMENT_URL: ""
 
 jobs:
   build-publish-release:
@@ -34,7 +35,9 @@ jobs:
       run: yarn install --frozen-lockfile
 
     - name: Dry run Semantic release to get next version
-      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} npx semantic-release --dry-run
+      run: |
+        GH_TOKEN=${{secrets.GITHUB_TOKEN}} npx semantic-release --dry-run > dry-run-release.log
+        NEXT_RELEASE=$(cat dry-run-release.log | grep -oP "the next release version is \K.*") >> $GITHUB_ENV
 
-    - name: Extract next release tag
-      run: GH_TOKEN=${{secrets.GITHUB_TOKEN}} npx semantic-release --dry-run --verbose | grep -oP 'Skip \\K.* tag creation in dry-run mode' | cut -d ' ' -f 1 || echo 'NotFound'
+    - name: Log next release tag
+      run: echo "Next release version is ${{ env.DEPLOYMENT_URL }}"
