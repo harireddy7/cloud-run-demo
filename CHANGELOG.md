@@ -1,3 +1,10 @@
+# [1.0.0-dev.2](https://github.com/harireddy7/cloud-run-demo/compare/v1.0.0-dev.1...v1.0.0-dev.2) (2024-12-09)
+
+
+### Bug Fixes
+
+* **jira-111:** update release rc file ([5128062](https://github.com/harireddy7/cloud-run-demo/commit/51280620f90cfcfe77cacbcf704da58ba83a72c0))
+
 # 1.0.0-dev.1 (2024-12-09)
 
 
