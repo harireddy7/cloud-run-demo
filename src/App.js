@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>Cloud Run Demo - Release - {process.env.REACT_APP_VERSION} ({process.env.NODE_ENV}) </p>
+        <p>Cloud Run Demo - Release - v{process.env.REACT_APP_VERSION} ({process.env.NODE_ENV}) </p>
       </header>
     </div>
   );
