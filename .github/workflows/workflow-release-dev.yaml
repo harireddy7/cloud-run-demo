@@ -36,7 +36,7 @@ jobs:
       with:
         version: '456.0.0'
 
-    - name: Log github context
+    - name: Log GitHub context
       run: echo $JSON
       env:
         JSON: ${{ toJSON(github) }}
