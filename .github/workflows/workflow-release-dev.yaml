@@ -21,7 +21,10 @@ jobs:
   build-publish-release:
     needs: get-next-release
     if: ${{ needs.get-next-release.outputs.release-version }} != ''
-    uses: ./.github/workflows/call_publish-to-dev.yaml
-    secrets: inherit
-    with:
-      release-version: ${{ needs.get-next-release.outputs.release-version }}
+    # uses: ./.github/workflows/call_publish-to-dev.yaml
+    # secrets: inherit
+    # with:
+      # release-version: ${{ needs.get-next-release.outputs.release-version }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{ needs.get-next-release.outputs.release-version }}
