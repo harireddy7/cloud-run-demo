@@ -5,13 +5,6 @@ on:
     branches:
     - dev
 
-env:
-  REGION: asia-south1
-  LOCATION: asia-south1-docker.pkg.dev
-  IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/release
-  SERVICE: release
-  NEXT_RELEASE: ""
-
 jobs:
   get-next-release:
     name: get next release version
