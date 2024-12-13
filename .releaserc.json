@@ -9,10 +9,15 @@
     }
   ],
   "repositoryUrl": "https://github.com/harireddy7/cloud-run-demo",
-"plugins": [
+  "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     "@semantic-release/git",
-    "@semantic-release/github"
+    [
+      "@semantic-release/github",
+      {
+        "successComment": false
+      }
+    ]
   ]
 }
