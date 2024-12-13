@@ -14,9 +14,15 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+
     steps:
       - name: checkout
         uses: actions/checkout@v4
+
+      - name: Use Node.js 21.2
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21.2'
 
       - name: dry run
         run: GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release --dry-run
