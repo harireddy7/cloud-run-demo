@@ -8,7 +8,6 @@
       "name": "main"
     }
   ],
-  "repositoryUrl": "https://github.com/harireddy7/cloud-run-demo",
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
