@@ -24,6 +24,7 @@ jobs:
 
       - id: extract-release-version
         run: |
+          echo "$(git tag -l)"
           GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release --dry-run --verbose > release-temp.log
           cat release-temp.log
           echo "release_version=$(cat release-temp.log | grep -oiP 'the next release version is \K.*')" >> "$GITHUB_OUTPUT"
