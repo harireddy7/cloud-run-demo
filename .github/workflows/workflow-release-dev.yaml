@@ -8,7 +8,12 @@ on:
 jobs:
   get-next-release:
     name: get next release version
-    uses: ./.github/workflows/call_get-next-release.yaml
-    secrets: inherit
-    with:
-      branch: dev
+    # uses: ./.github/workflows/call_get-next-release.yaml
+    # secrets: inherit
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: dry run
+        run: GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release --dry-run
