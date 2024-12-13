@@ -2,6 +2,10 @@ name: Get next release version from semantic release dry run
 
 on:
   workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
     outputs:
       release-version:
         value: ${{ jobs.get-release-version.outputs.release-version }}
@@ -19,11 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
 
       - name: log git logs
         run: |
           echo "$(git log --oneline -10)"
-          echo "$(git tag --l)"
+          echo "$(git tag -l)"
 
       - id: extract-release-version
         run: |

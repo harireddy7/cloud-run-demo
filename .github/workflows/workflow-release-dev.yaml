@@ -10,3 +10,5 @@ jobs:
     name: get next release version
     uses: ./.github/workflows/call_get-next-release.yaml
     secrets: inherit
+    with:
+      branch: dev
