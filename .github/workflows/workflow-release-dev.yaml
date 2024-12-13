@@ -15,9 +15,5 @@ env:
 jobs:
   get-next-release:
     name: get next release version
-    # uses: ./.github/workflows/call_get-next-release.yaml
-    # secrets: inherit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release --dry-run --verbose
+    uses: ./.github/workflows/call_get-next-release.yaml
+    secrets: inherit
