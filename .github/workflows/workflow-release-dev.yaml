@@ -15,16 +15,8 @@ env:
 jobs:
   get-next-release:
     name: get next release version
-    uses: ./.github/workflows/call_get-next-release.yaml
-    secrets: inherit
-
-  build-publish-release:
-    needs: get-next-release
-    if: ${{ needs.get-next-release.outputs.release-version }} != ''
-    # uses: ./.github/workflows/call_publish-to-dev.yaml
+    # uses: ./.github/workflows/call_get-next-release.yaml
     # secrets: inherit
-    # with:
-      # release-version: ${{ needs.get-next-release.outputs.release-version }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ needs.get-next-release.outputs.release-version }}
+      - run: GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release --dry-run --verbose
