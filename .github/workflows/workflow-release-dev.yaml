@@ -16,5 +16,3 @@ jobs:
     needs: get-next-release
     uses: ./.github/workflows/call_publish-release-notes.yaml
     secrets: inherit
-    with:
-      release-version: ${{ needs.get-next-release.outputs.release-version }}
