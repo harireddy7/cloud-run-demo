@@ -14,7 +14,7 @@ jobs:
   publish-to-dev:
     name: Publish to dev
     needs: get-next-release
-    uses: ./.github/workflows/call_publish-to-dev.yaml
+    uses: ./.github/workflows/call_publish-release-notes.yaml
     secrets: inherit
     with:
       release-version: ${{ needs.get-next-release.outputs.release-version }}
