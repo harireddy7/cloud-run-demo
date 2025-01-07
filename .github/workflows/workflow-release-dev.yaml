@@ -13,7 +13,7 @@ jobs:
 
   log-next-release:
     name: Log next release version
-    runs-on: ubunut-latest
+    runs-on: ubunutu-latest
     needs: get-next-release
     steps:
       - name: Log release
