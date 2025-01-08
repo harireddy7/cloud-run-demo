@@ -1,0 +1,39 @@
+# Release - Build and publish release image and Deploy to Cloud Run.
+name: Release to dev
+
+on:
+  workflow_call:
+    inputs:
+      release-version:
+        required: true
+        type: string
+
+env:
+  REGION: asia-south1
+  LOCATION: asia-south1-docker.pkg.dev
+  IMAGE: asia-south1-docker.pkg.dev/cloud-run-preview-demo/cloud-run-repo/release
+  SERVICE: release
+  NEXT_RELEASE: ${{ inputs.release-version }}
+
+jobs:
+  build-publish-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Use Node.js 21.2
+      uses: actions/setup-node@v3
+      with:
+        node-version: '21.2'
+
+    - name: Get docker release image name & path
+      id: get-docker-image
+      if: ${{ env.NEXT_RELEASE != '' }}
+      run: |
+        echo "Next release version is v$NEXT_RELEASE"
+        echo "IMAGE_PATH=$IMAGE:$NEXT_RELEASE" >> $GITHUB_ENV
