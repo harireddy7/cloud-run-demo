@@ -1,0 +1,38 @@
+name: Get commit hash from git tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      app-version:
+        description: release version
+        type: string
+        required: true
+
+env:
+  APP_VERSION: ${{ inputs.app-version }}
+
+jobs:
+  get-commit-hash:
+    name: Fetch commit hash for the provided app version
+    runs-on: ubuntu-latest
+    outputs:
+      commit-hash: ${{ steps.get-commit-hash.outputs.commit_hash }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: v${{ env.APP_VERSION }}
+
+      - name: Get commit hash
+        id: get-commit-hash
+        run: echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  promote-to-staging:
+    name: Promote helm changes to staging environment
+    needs: get-commit-hash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log commit hash
+        run: |
+          echo "${{ needs.get-commit-hash.outputs.commit-hash }}"
