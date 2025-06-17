@@ -33,8 +33,8 @@ jobs:
           echo "|:--------------------|:---------------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Version**         | \`1.0.0-dev.55\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Environment**     | dev |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
@@ -48,8 +48,8 @@ jobs:
           echo "|:--------------------|:---------------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Version**         | \`1.0.0-stg.55\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Environment**     | stg |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
           echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
