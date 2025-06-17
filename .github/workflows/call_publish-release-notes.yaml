@@ -24,5 +24,5 @@ jobs:
       - id: run-semantic-release
         run: |
           GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release
-          echo "## Deployment to dev" >> $GITHUB_STEP_SUMMARY
+          echo "# Deployment to dev" >> $GITHUB_STEP_SUMMARY
           echo "App deployed to **dev** ✅" >> $GITHUB_STEP_SUMMARY
