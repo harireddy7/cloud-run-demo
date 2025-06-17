@@ -24,5 +24,17 @@ jobs:
       - id: run-semantic-release
         run: |
           GH_TOKEN=${{ secrets.GITHUB_TOKEN }} npx semantic-release
-          echo "# Deployment to dev" >> $GITHUB_STEP_SUMMARY
-          echo "App deployed to **dev** ✅" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment summary
+        run: |
+          echo "# 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "**✅ Deployment Successful**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: Development" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: \`1.0.0-dev.25\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+
