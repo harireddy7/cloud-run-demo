@@ -8,7 +8,7 @@ on:
 
 jobs:
   get-release-version:
-    name: Get next release version
+    name: 🔖
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.extract-release-version.outputs.release_version }}

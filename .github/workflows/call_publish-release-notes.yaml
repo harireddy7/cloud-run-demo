@@ -5,6 +5,7 @@ on:
 
 jobs:
   publish-release-notes:
+    name: 📓Get Next Version
     runs-on: ubuntu-latest
     permissions:
       contents: write
