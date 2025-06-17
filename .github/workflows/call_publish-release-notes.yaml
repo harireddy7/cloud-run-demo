@@ -28,19 +28,29 @@ jobs:
       - name: Deployment summary
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
-          echo "# 📦 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 📦 dev" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Deployment to Development Environment Completed Successfully**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| **Version**         | \`1.0.0-dev.110\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **App**         | cloud-run-demo |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version**         | \`1.0.0-dev.55\` |" >> $GITHUB_STEP_SUMMARY
           echo "| **Environment**     | dev |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------------------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+
+      - name: Deployment summary 2
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "# 📦 stg" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| **App**         | cloud-run-demo |" >> $GITHUB_STEP_SUMMARY
           echo "|--------------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version**         | \`1.0.0-stg.55\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment**     | stg |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status**          | Success ✅ |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
