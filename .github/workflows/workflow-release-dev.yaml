@@ -11,18 +11,30 @@ jobs:
     uses: ./.github/workflows/call_get-next-release.yaml
     secrets: inherit
 
-  log-next-release:
-    name: Log next release version
+  promote-to-dev-summary:
+    name: Promote to dev
     runs-on: ubuntu-latest
     needs: get-next-release
     steps:
-      - name: Log release
-        run: echo ${{ needs.get-next-release.outputs.release-version }}
+      - name: Deployment summary
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "# 📦 dev" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| **App**             | cloud-run-demo |" >> $GITHUB_STEP_SUMMARY
+          echo "|:--------------------|:---------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version**         | \`1.0.0-dev.55\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment**     | dev |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status**          | Success ☑️ |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
 
   test-conditional-job:
     name: test conditional job
     runs-on: ubuntu-latest
-    needs: [get-next-release, log-next-release]
+    needs: [get-next-release]
     if: ${{ needs.get-next-release.outputs.release-version }} != ''
     steps:
       - run: echo "test-conditional-job - Next release version is ${{ needs.get-next-release.outputs.release-version }}"
@@ -30,13 +42,33 @@ jobs:
   test-conditional-job2:
     name: test conditional job2
     runs-on: ubuntu-latest
-    needs: [get-next-release, log-next-release]
+    needs: [get-next-release]
     if: ${{ needs.get-next-release.outputs.release-version != '' }}
     steps:
       - run: echo "test-conditional-job2 - Next release version is ${{ needs.get-next-release.outputs.release-version }}"
 
   publish-to-dev:
     name: Publish to dev
-    needs: [get-next-release, log-next-release]
+    needs: [get-next-release]
     uses: ./.github/workflows/call_publish-release-notes.yaml
     secrets: inherit
+
+  promote-to-stg-summary:
+    name: Promote to stg
+    runs-on: ubuntu-latest
+    needs: get-next-release
+    steps:
+      - name: Deployment summary
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          echo "# 📦 dev" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| **App**             | cloud-run-demo |" >> $GITHUB_STEP_SUMMARY
+          echo "|:--------------------|:---------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version**         | \`1.0.0-stg.55\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment**     | stg |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Triggered by**    | \`${{ github.event_name }}\` on branch \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status**          | Success ☑️ |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Timestamp (UTC)** | $TIMESTAMP |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
