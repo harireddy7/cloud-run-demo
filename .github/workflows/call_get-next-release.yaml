@@ -34,5 +34,5 @@ jobs:
           RELEASE_VERSION=$(cat release-temp.log | grep -oiP 'the next release version is \K.*')
           echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
           echo "## 🚀 Next Release Version" >> $GITHUB_STEP_SUMMARY
-          echo "This workflow deployed app with build version **$RELEASE_VERSION** to **dev**." >> $GITHUB_STEP_SUMMARY
+          echo "This workflow deployed app with build version **$RELEASE_VERSION** to **dev** ✅" >> $GITHUB_STEP_SUMMARY
           echo "#" >> $GITHUB_STEP_SUMMARY
