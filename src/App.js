@@ -1,6 +1,6 @@
 import './App.css';
 
-function App() {
+const App = () => {
   console.log(process.env.NODE_ENV, process.env.REACT_APP_VERSION)
   return (
     <div className="App">
